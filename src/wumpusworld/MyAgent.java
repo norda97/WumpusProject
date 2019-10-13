@@ -1,5 +1,8 @@
 package wumpusworld;
 
+import wumpusworld.Imp.KnowledgeBase;
+import wumpusworld.Imp.Fact;
+
 /**
  * Contains starting code for creating your own Wumpus World agent.
  * Currently the agent only make a random decision each turn.
@@ -10,6 +13,7 @@ public class MyAgent implements Agent
 {
     private World w;
     int rnd;
+    private KnowledgeBase kb;
     
     /**
      * Creates a new instance of your solver agent.
@@ -18,7 +22,8 @@ public class MyAgent implements Agent
      */
     public MyAgent(World world)
     {
-        w = world;   
+        w = world;
+        this.kb = new KnowledgeBase(4);
     }
    
             
@@ -78,6 +83,17 @@ public class MyAgent implements Agent
         {
             System.out.println("I am facing Down");
         }
+        
+        // Update GUI numbers
+        for(int i = 0; i < kb.size; i++) {
+            for(int j = 0; j < kb.size; j++) {
+                Fact f = kb.factGrid.get(i + j * kb.size);
+                
+                w.probs[i][j][0] = f.probStench;
+                w.probs[i][j][1] = f.wump;
+            }
+        }
+        
         
         //decide next move
         rnd = decideRandomMove();

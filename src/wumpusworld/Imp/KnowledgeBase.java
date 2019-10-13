@@ -5,8 +5,8 @@ import java.util.List;
 
 public class KnowledgeBase 
 {       
-    private List<Fact> factGrid = new ArrayList<Fact>();
-            private int size;
+    public List<Fact> factGrid = new ArrayList<Fact>();
+    public int size;
 
     public KnowledgeBase(int gridSize) 
     {

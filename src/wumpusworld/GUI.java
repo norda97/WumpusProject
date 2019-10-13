@@ -34,6 +34,8 @@ public class GUI implements ActionListener
     private ImageIcon l_player_left;
     private ImageIcon l_player_right;
     
+    // ######## OUR CODE ########
+    private JLabel[][][] text;
     /**
      * Creates and start the GUI.
      */
@@ -105,6 +107,13 @@ public class GUI implements ActionListener
         return true;
     }
     
+    // ###### OUR CODE ######
+    public void setText(int i, int j, float probPit, int wump) {
+        this.text[i][j][0].setText("prob: " + probPit);
+        this.text[i][j][1].setText("w:" + wump);
+    }
+    // ###### OUR CODE ######
+    
     /**
      * Creates all window components.
      */
@@ -122,6 +131,9 @@ public class GUI implements ActionListener
         
         //Add blocks
         blocks = new JPanel[4][4];
+        // ####### OUR CODE #########
+        text = new JLabel[4][4][2];
+        // ####### OUR CODE #########
         for (int j = 3; j >= 0; j--)
         {
             for (int i = 0; i < 4; i++)
@@ -130,12 +142,13 @@ public class GUI implements ActionListener
                 blocks[i][j].setBackground(Color.white);
                 blocks[i][j].setPreferredSize(new Dimension(150,150));
                 blocks[i][j].setBorder(BorderFactory.createLineBorder(Color.black));
-                blocks[i][j].setLayout(new GridLayout(3,3));
+                blocks[i][j].setLayout(new GridLayout(2,2));
                 // ############### OUR CODE !!!!####################
-                JLabel text = new JLabel("hej världen!", SwingConstants.CENTER);
-                text.setPreferredSize(new Dimension(200,25));
-                text.setForeground(Color.red);
-                blocks[i][j].add(text);
+                blocks[i][j].setLayout(new GridLayout(2,3));
+                text[i][j][0] = new JLabel();
+                text[i][j][1] = new JLabel();
+                text[i][j][0].setPreferredSize(new Dimension(50,25));
+                text[i][j][1].setPreferredSize(new Dimension(50,25));
                 // ############### OUR CODE !!!!####################
                 gamepanel.add(blocks[i][j]);
             }
@@ -288,6 +301,16 @@ public class GUI implements ActionListener
             {
                 blocks[i][j].removeAll();
                 blocks[i][j].setBackground(Color.WHITE);
+                
+                // ############# OUR CODE ################
+                if (w.probs[i][j][0] + w.probs[i][j][1] > 0) {
+                    text[i][j][0].setText("probP:" + w.probs[i][j][0]);
+                    text[i][j][1].setText("wump:" + w.probs[i][j][1]);
+                }
+                blocks[i][j].add(text[i][j][0]);
+                blocks[i][j].add(text[i][j][1]);
+                // ############# OUR CODE ################
+                
                 if (w.hasPit(i+1, j+1))
                 {
                     blocks[i][j].add(new JLabel(l_pit));

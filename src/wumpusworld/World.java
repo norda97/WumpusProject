@@ -48,6 +48,10 @@ public class World
     public static final String A_TURN_LEFT = "l";
     public static final String A_TURN_RIGHT = "r";
     
+    // #### OUR CODE ####
+    public float[][][] probs;
+    // ######## OUR CODE ########
+    
     /**
      * Creates a new Wumpus World. The Wumpus World works with
      * any size 4 or larger, but only size 4 is supported by
@@ -57,6 +61,9 @@ public class World
      */
     public World(int size)
     {
+        this.probs = new float[4][4][2];
+        
+        
         this.size = size;
         w = new String[size+1][size+1];
         
