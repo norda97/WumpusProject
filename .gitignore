@@ -1,5 +1,6 @@
 /dist/
 
 *.class
+buil/
 BuildWin/
 run.sh
