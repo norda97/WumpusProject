@@ -1,6 +1,7 @@
 package wumpusworld;
 
 import java.util.Vector;
+import wumpusworld.Imp.Fact;
 
 /**
  * This class handles an instance of the Wumpus World. It contains the world
@@ -61,9 +62,6 @@ public class World
      */
     public World(int size)
     {
-        this.probs = new float[4][4][2];
-        
-        
         this.size = size;
         w = new String[size+1][size+1];
         
@@ -74,6 +72,8 @@ public class World
                 w[x][y] = UNKNOWN;
             }
         }
+        
+        this.probs = new float[4][4][2];
         
         setVisited(1, 1);
     }
@@ -596,6 +596,12 @@ public class World
         {
             score -= 1000;
             gameOver = true;
+            for(int i = 0; i < 4; i++) {
+                for(int j = 0; j < 4; j++) {
+                this.probs[i][j][0] = 0.f;
+                this.probs[i][j][1] = 0.f;
+            }
+        }
         }
         if (hasPit(pX,pY))
         {

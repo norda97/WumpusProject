@@ -2,7 +2,7 @@ package wumpusworld;
 
 import wumpusworld.Imp.KnowledgeBase;
 import wumpusworld.Imp.Fact;
-
+import wumpusworld.Imp.Vector2;
 /**
  * Contains starting code for creating your own Wumpus World agent.
  * Currently the agent only make a random decision each turn.
@@ -57,14 +57,17 @@ public class MyAgent implements Agent
         //Test the environment
         if (w.hasBreeze(cX, cY))
         {
+            kb.update(new Vector2(cX, cY), Fact.Type.BREEZE);
             System.out.println("I am in a Breeze");
         }
         if (w.hasStench(cX, cY))
         {
+            kb.update(new Vector2(cX, cY), Fact.Type.STENCH);
             System.out.println("I am in a Stench");
         }
         if (w.hasPit(cX, cY))
         {
+            kb.factGrid[cX-1][cY-1].type = Fact.Type.PIT;
             System.out.println("I am in a Pit");
         }
         if (w.getDirection() == World.DIR_RIGHT)
@@ -87,7 +90,7 @@ public class MyAgent implements Agent
         // Update GUI numbers
         for(int i = 0; i < kb.size; i++) {
             for(int j = 0; j < kb.size; j++) {
-                Fact f = kb.factGrid.get(i + j * kb.size);
+                Fact f = kb.factGrid[i][j];
                 
                 w.probs[i][j][0] = f.probStench;
                 w.probs[i][j][1] = f.wump;

@@ -306,9 +306,9 @@ public class GUI implements ActionListener
                 if (w.probs[i][j][0] + w.probs[i][j][1] > 0) {
                     text[i][j][0].setText("probP:" + w.probs[i][j][0]);
                     text[i][j][1].setText("wump:" + w.probs[i][j][1]);
+                    blocks[i][j].add(text[i][j][0]);
+                    blocks[i][j].add(text[i][j][1]);
                 }
-                blocks[i][j].add(text[i][j][0]);
-                blocks[i][j].add(text[i][j][1]);
                 // ############# OUR CODE ################
                 
                 if (w.hasPit(i+1, j+1))
