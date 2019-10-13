@@ -3,6 +3,6 @@
 .vscode/
 
 *.class
-buil/
+build/
 BuildWin/
 run.sh
