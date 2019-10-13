@@ -1,5 +1,7 @@
 /dist/
 
+.vscode/
+
 *.class
 buil/
 BuildWin/
