@@ -35,6 +35,6 @@ public class Fact {
 
     public String toString()
     {
-        return "Type: " + type.name() + ", probPit: " + Float.toString(this.probStench) + ", wump: " + Integer.toString(this.wump) + ", Pos: " + this.pos.toString();
+        return "Type: " + type.name() + ", probPit: " + Float.toString(this.probPit) + ", wump: " + Integer.toString(this.wump) + ", Pos: " + this.pos.toString();
     }
 }

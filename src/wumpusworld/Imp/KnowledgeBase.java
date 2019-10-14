@@ -27,7 +27,7 @@ public class KnowledgeBase
         for(int i = 0; i < this.size; i++) {
             for(int j = 0; j < this.size; j++) {
                 factGrid[i][j].wump = 0;
-                factGrid[i][j].probStench = 0.0f;
+                factGrid[i][j].probPit = 0.0f;
             }
         }
     }

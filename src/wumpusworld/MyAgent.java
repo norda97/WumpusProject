@@ -112,7 +112,7 @@ public class MyAgent implements Agent
             Fact f = neighbours[i];
             if(f != null)
             {
-                if(f.wump <= 0 && f.probStench <= 0.0f)
+                if(f.wump <= 0 && f.probPit <= 0.0f)
                 {
                     goodMoves.add(i);
                 }
