@@ -595,13 +595,8 @@ public class World
         {
             score -= 1000;
             gameOver = true;
-            for(int i = 0; i < 4; i++) {
-                for(int j = 0; j < 4; j++) {
-                this.probs[i][j][0] = 0.f;
-                this.probs[i][j][1] = 0.f;
-            }
         }
-        }
+        
         if (hasPit(pX,pY))
         {
             score -= 1000;

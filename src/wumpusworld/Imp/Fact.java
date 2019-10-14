@@ -24,12 +24,12 @@ public class Fact {
     public Vector2 pos;
     public Type type;
     public int wump;
-    public float probStench;
+    public float probPit;
     
     public Fact(Type type, Vector2 pos) {
         this.type = type;
         this.pos = pos;
-        this.probStench = 0.f;
+        this.probPit = 0.f;
         this.wump = 0;
     }
 

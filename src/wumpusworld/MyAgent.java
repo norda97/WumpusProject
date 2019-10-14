@@ -42,7 +42,6 @@ public class MyAgent implements Agent
         int cX = w.getPlayerX();
         int cY = w.getPlayerY();
         
-        
         //Basic action:
         //Grab Gold if we can.
         if (w.hasGlitter(cX, cY))
@@ -62,17 +61,17 @@ public class MyAgent implements Agent
         //Test the environment
         if (w.hasBreeze(cX, cY))
         {
-            kb.update(new Vector2(cX, cY), Fact.Type.BREEZE);
+            kb.setType(new Vector2(cX, cY), Fact.Type.BREEZE);
             System.out.println("I am in a Breeze");
         }
         if (w.hasStench(cX, cY))
         {
-            kb.update(new Vector2(cX, cY), Fact.Type.STENCH);
+            kb.setType(new Vector2(cX, cY), Fact.Type.STENCH);
             System.out.println("I am in a Stench");
         }
         if (w.hasPit(cX, cY))
         {
-            kb.factGrid[cX-1][cY-1].type = Fact.Type.PIT;
+             kb.setType(new Vector2(cX, cY), Fact.Type.PIT);
             System.out.println("I am in a Pit");
         }
         if (w.getDirection() == World.DIR_RIGHT)
@@ -92,12 +91,15 @@ public class MyAgent implements Agent
             System.out.println("I am facing Down");
         }
         
+        // Update knowledgebase with current knowledge
+        kb.update();
+        
         // Update GUI numbers
         for(int i = 0; i < kb.size; i++) {
             for(int j = 0; j < kb.size; j++) {
                 Fact f = kb.factGrid[i][j];
                 
-                w.probs[i][j][0] = f.probStench;
+                w.probs[i][j][0] = f.probPit;
                 w.probs[i][j][1] = f.wump;
             }
         }
@@ -123,33 +125,6 @@ public class MyAgent implements Agent
         moveTo(d);
 
         kb.reset();
-
-        //decide next move
-        /*rnd = decideRandomMove();
-        if (rnd==0)
-        {
-            w.doAction(World.A_TURN_LEFT);
-            w.doAction(World.A_MOVE);
-        }
-        
-        if (rnd==1)
-        {
-            w.doAction(World.A_MOVE);
-        }
-                
-        if (rnd==2)
-        {
-            w.doAction(World.A_TURN_LEFT);
-            w.doAction(World.A_TURN_LEFT);
-            w.doAction(World.A_MOVE);
-        }
-                        
-        if (rnd==3)
-        {
-            w.doAction(World.A_TURN_RIGHT);
-            w.doAction(World.A_MOVE);
-        }*/
-                
     }
 
     private void moveTo(int dir)
@@ -164,7 +139,6 @@ public class MyAgent implements Agent
             else w.doAction(World.A_TURN_RIGHT);
         }
     }
-    
      /**
      * Genertes a random instruction for the Agent.
      */
