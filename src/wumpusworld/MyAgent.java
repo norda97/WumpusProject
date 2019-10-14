@@ -1,8 +1,13 @@
 package wumpusworld;
 
 import wumpusworld.Imp.KnowledgeBase;
+
+import java.util.List;
+import java.util.ArrayList;
+
 import wumpusworld.Imp.Fact;
 import wumpusworld.Imp.Vector2;
+import wumpusworld.Imp.Fact.Type;
 /**
  * Contains starting code for creating your own Wumpus World agent.
  * Currently the agent only make a random decision each turn.
@@ -94,14 +99,33 @@ public class MyAgent implements Agent
                 
                 w.probs[i][j][0] = f.probStench;
                 w.probs[i][j][1] = f.wump;
-                f.wump = 0;
-                f.probStench = 0;
             }
         }
+
+        Fact[] neighbours = kb.getAdjacent(new Vector2(cX, cY));
         
-        
+        List<Integer> goodMoves = new ArrayList<Integer>();
+        for(int i = 0; i < 4; i++)
+        {
+            Fact f = neighbours[i];
+            if(f != null)
+            {
+                if(f.wump <= 0 && f.probStench <= 0.0f)
+                {
+                    goodMoves.add(i);
+                }
+            }
+        }        
+
+        // Move to desired direction.
+        int s = goodMoves.size();
+        int d = goodMoves.get(decideRandomMove(s));
+        moveTo(d);
+
+        kb.reset();
+
         //decide next move
-        rnd = decideRandomMove();
+        /*rnd = decideRandomMove();
         if (rnd==0)
         {
             w.doAction(World.A_TURN_LEFT);
@@ -124,16 +148,29 @@ public class MyAgent implements Agent
         {
             w.doAction(World.A_TURN_RIGHT);
             w.doAction(World.A_MOVE);
-        }
+        }*/
                 
-    }    
+    }
+
+    private void moveTo(int dir)
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            if(w.getDirection() == dir)
+            {
+                w.doAction(World.A_MOVE);
+                break;
+            }
+            else w.doAction(World.A_TURN_RIGHT);
+        }
+    }
     
      /**
      * Genertes a random instruction for the Agent.
      */
-    public int decideRandomMove()
+    public int decideRandomMove(int s)
     {
-      return (int)(Math.random() * 4);
+      return (int)(Math.random() * s);
     }
     
     

@@ -22,17 +22,27 @@ public class KnowledgeBase
         factGrid[0][0].type = Fact.Type.EMPTY;
     }
     
-    private Fact[] getAdjacent(Vector2 pos) {
-        Fact[] neighbours = new Fact[4];
+    public void reset()
+    {
+        for(int i = 0; i < this.size; i++) {
+            for(int j = 0; j < this.size; j++) {
+                factGrid[i][j].wump = 0;
+                factGrid[i][j].probStench = 0.0f;
+            }
+        }
+    }
 
-        if (pos.x+1 <= this.size)
-                neighbours[0] = factGrid[(pos.x+1)-1][(pos.y)-1];
-        if (pos.x-1 >= 1)
-                neighbours[1] = factGrid[(pos.x-1)-1][(pos.y)-1];
-        if (pos.y+1 <= this.size)
-                neighbours[2] = factGrid[(pos.x)-1][(pos.y+1)-1];
-        if (pos.y-1 >= 1)
-                neighbours[3] = factGrid[(pos.x)-1][(pos.y-1)-1];
+    public Fact[] getAdjacent(Vector2 pos) {
+        Fact[] neighbours = new Fact[4];
+        
+        if (pos.y+1 <= this.size) // Up
+            neighbours[0] = factGrid[(pos.x)-1][(pos.y+1)-1];
+        if (pos.x+1 <= this.size) // Right
+            neighbours[1] = factGrid[(pos.x+1)-1][(pos.y)-1];
+        if (pos.y-1 >= 1) // Down
+            neighbours[2] = factGrid[(pos.x)-1][(pos.y-1)-1];
+        if (pos.x-1 >= 1) // Left
+            neighbours[3] = factGrid[(pos.x-1)-1][(pos.y)-1];
 
         return neighbours;
     }
@@ -70,7 +80,7 @@ public class KnowledgeBase
                    case UNKNOWN:
                        adj.wump++;
 
-                       if (adj.wump >= 2) {
+                       if (adj.wump >= 3) {
                            adj.type = Fact.Type.WUMPUS;
                        }
                        break;

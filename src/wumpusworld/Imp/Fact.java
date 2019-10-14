@@ -32,4 +32,9 @@ public class Fact {
         this.probStench = 0.f;
         this.wump = 0;
     }
+
+    public String toString()
+    {
+        return "Type: " + type.name() + ", probPit: " + Float.toString(this.probStench) + ", wump: " + Integer.toString(this.wump) + ", Pos: " + this.pos.toString();
+    }
 }
