@@ -37,14 +37,16 @@ public class KnowledgeBase
         return neighbours;
     }
     
-    public void update(Vector2 pos, Fact.Type foundType) {
-        factGrid[pos.x-1][pos.y-1].type = foundType;
-
+    public void update() {
          for (int x = 0; x < this.size; x++) {
                 for (int y = 0; y < this.size; y++) {
                        handleFact(factGrid[x][y]);
                 }
         }   
+    }
+    
+    public void setType(Vector2 pos, Fact.Type foundType) {
+        factGrid[pos.x-1][pos.y-1].type = foundType;
     }
 
     private void handleFact(Fact f) {
@@ -54,7 +56,11 @@ public class KnowledgeBase
                     handleStench(f);
                     break;
                 case BREEZE:
-
+                    handleBreeze(f);
+                    break;
+                case PIT:
+                    f.type = Fact.Type.PIT;
+                    f.probPit = 1.0f;
                     break;
             }
 
@@ -68,13 +74,32 @@ public class KnowledgeBase
             if (adj != null) {
                 switch(adj.type) {
                    case UNKNOWN:
-                       adj.wump++;
+                        adj.wump++;
 
-                       if (adj.wump >= 2) {
-                           adj.type = Fact.Type.WUMPUS;
-                       }
+                        if (adj.wump >= 3) {
+                            adj.type = Fact.Type.WUMPUS;
+                        }
                        break;
                }
+            }
+        }
+    }
+    
+    private void handleBreeze(Fact f) {
+        Fact[] adjacent = this.getAdjacent(f.pos);
+        
+        int unknownCount = 0;
+        for (Fact adj : adjacent) {
+            if (adj != null && adj.type == Fact.Type.UNKNOWN) {
+                unknownCount++;
+            }
+        }
+        
+        for (Fact adj : adjacent) {
+            if (adj != null && adj.type == Fact.Type.UNKNOWN) {
+                adj.probPit += 1.f/unknownCount;
+                if (adj.probPit >= 1.0f)
+                    adj.type = Fact.Type.PIT;
             }
         }
     }
