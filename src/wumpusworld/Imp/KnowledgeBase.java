@@ -6,12 +6,16 @@ import java.util.List;
 public class KnowledgeBase 
 {       
     public Cell[][] grid;
+    private List<Vector2> knownStenches; 
+    private List<Vector2> knownBreezes; 
     public int size;
 
     public KnowledgeBase(int gridSize) 
     {
         this.size = gridSize;
         this.grid = new Cell[gridSize][gridSize];
+        this.knownStenches = new ArrayList();
+        this.knownBreezes = new ArrayList();
 
         for (int x = 0; x < this.size; x++) {
                 for (int y = 0; y < this.size; y++) {
@@ -64,8 +68,15 @@ public class KnowledgeBase
                 alreadyAdded = true;
         }
         
-        if (!alreadyAdded)
+        if (!alreadyAdded) {
             grid[pos.x-1][pos.y-1].addFact(new Fact(foundType));
+            
+            if (foundType == Fact.Type.STENCH)
+                this.knownStenches.add(new Vector2(pos.x-1 , pos.y-1));
+            if (foundType == Fact.Type.BREEZE)
+                this.knownBreezes.add(new Vector2(pos.x-1 , pos.y-1));
+        }
+           
     }
 
     private void handleFacts(Cell c) {
