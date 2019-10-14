@@ -94,6 +94,8 @@ public class MyAgent implements Agent
                 
                 w.probs[i][j][0] = f.probStench;
                 w.probs[i][j][1] = f.wump;
+                f.wump = 0;
+                f.probStench = 0;
             }
         }
         

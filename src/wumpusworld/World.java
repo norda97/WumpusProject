@@ -50,7 +50,7 @@ public class World
     public static final String A_TURN_RIGHT = "r";
     
     // #### OUR CODE ####
-    public float[][][] probs;
+    public float[][][] probs = new float[4][4][2];;
     // ######## OUR CODE ########
     
     /**
@@ -73,7 +73,6 @@ public class World
             }
         }
         
-        this.probs = new float[4][4][2];
         
         setVisited(1, 1);
     }
