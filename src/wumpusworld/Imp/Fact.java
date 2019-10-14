@@ -21,20 +21,14 @@ public class Fact {
         UNKNOWN
     }
     
-    public Vector2 pos;
     public Type type;
-    public int wump;
-    public float probPit;
     
-    public Fact(Type type, Vector2 pos) {
+    public Fact(Type type) {
         this.type = type;
-        this.pos = pos;
-        this.probPit = 0.f;
-        this.wump = 0;
     }
 
     public String toString()
     {
-        return "Type: " + type.name() + ", probPit: " + Float.toString(this.probPit) + ", wump: " + Integer.toString(this.wump) + ", Pos: " + this.pos.toString();
+        return "Type: " + type.name();
     }
 }

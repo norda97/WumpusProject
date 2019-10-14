@@ -5,9 +5,9 @@ import wumpusworld.Imp.KnowledgeBase;
 import java.util.List;
 import java.util.ArrayList;
 
+import wumpusworld.Imp.Cell;
 import wumpusworld.Imp.Fact;
 import wumpusworld.Imp.Vector2;
-import wumpusworld.Imp.Fact.Type;
 /**
  * Contains starting code for creating your own Wumpus World agent.
  * Currently the agent only make a random decision each turn.
@@ -61,17 +61,17 @@ public class MyAgent implements Agent
         //Test the environment
         if (w.hasBreeze(cX, cY))
         {
-            kb.setType(new Vector2(cX, cY), Fact.Type.BREEZE);
+            kb.addType(new Vector2(cX, cY), Fact.Type.BREEZE);
             System.out.println("I am in a Breeze");
         }
         if (w.hasStench(cX, cY))
         {
-            kb.setType(new Vector2(cX, cY), Fact.Type.STENCH);
+            kb.addType(new Vector2(cX, cY), Fact.Type.STENCH);
             System.out.println("I am in a Stench");
         }
         if (w.hasPit(cX, cY))
         {
-             kb.setType(new Vector2(cX, cY), Fact.Type.PIT);
+             kb.addType(new Vector2(cX, cY), Fact.Type.PIT);
             System.out.println("I am in a Pit");
         }
         if (w.getDirection() == World.DIR_RIGHT)
@@ -97,22 +97,22 @@ public class MyAgent implements Agent
         // Update GUI numbers
         for(int i = 0; i < kb.size; i++) {
             for(int j = 0; j < kb.size; j++) {
-                Fact f = kb.factGrid[i][j];
+                Cell c = kb.grid[i][j];
                 
-                w.probs[i][j][0] = f.probPit;
-                w.probs[i][j][1] = f.wump;
+                w.probs[i][j][0] = c.probPit;
+                w.probs[i][j][1] = c.wump;
             }
         }
 
-        Fact[] neighbours = kb.getAdjacent(new Vector2(cX, cY));
+        Cell[] neighbours = kb.getAdjacent(new Vector2(cX, cY));
         
-        List<Integer> goodMoves = new ArrayList<Integer>();
+        List<Integer> goodMoves = new ArrayList();
         for(int i = 0; i < 4; i++)
         {
-            Fact f = neighbours[i];
-            if(f != null)
+            Cell c = neighbours[i];
+            if(c != null)
             {
-                if(f.wump <= 0 && f.probPit <= 0.0f)
+                if(c.wump <= 0 && c.probPit <= 0.0f)
                 {
                     goodMoves.add(i);
                 }
