@@ -71,8 +71,12 @@ public class MyAgent implements Agent
         }
         if (w.hasPit(cX, cY))
         {
-             kb.addType(new Vector2(cX, cY), Fact.Type.PIT);
+            kb.addType(new Vector2(cX, cY), Fact.Type.PIT);
             System.out.println("I am in a Pit");
+        }
+        if(kb.grid[cX-1][cY-1].unknown) {
+            kb.addType(new Vector2(cX, cY), Fact.Type.EMPTY);
+            System.out.println("I am in a Empty");
         }
         if (w.getDirection() == World.DIR_RIGHT)
         {
@@ -112,8 +116,11 @@ public class MyAgent implements Agent
             Cell c = neighbours[i];
             if(c != null)
             {
-                if(c.wump <= 0 && c.probPit <= 0.0f)
+                if(c.safe)
                 {
+                    goodMoves.add(i);
+                }
+                else if (c.wump == 1 && (c.probPit > 0.0f && c.probPit <= 0.75f)) {
                     goodMoves.add(i);
                 }
             }
@@ -121,8 +128,10 @@ public class MyAgent implements Agent
 
         // Move to desired direction.
         int s = goodMoves.size();
-        int d = goodMoves.get(decideRandomMove(s));
-        moveTo(d);
+        if (s > 0) {
+            int d = goodMoves.get(decideRandomMove(s));
+            moveTo(d);
+        }
 
         kb.reset();
     }

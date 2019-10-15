@@ -17,6 +17,7 @@ public class Cell {
     public int wump;
     public float probPit;
     public boolean unknown;
+    public boolean safe;
     
     public Cell(int x, int y) {
         this.facts = new ArrayList();
@@ -24,11 +25,14 @@ public class Cell {
         this.wump = 0;
         this.probPit = 0.0f;
         this.unknown = true;
+        this.safe = false;
     }
     
     public void addFact(Fact f) {
         this.facts.add(f);
         this.unknown = false;
+        if (f.type == Fact.Type.EMPTY)
+            this.safe = true;
     }
     
     public String toString()

@@ -22,8 +22,6 @@ public class KnowledgeBase
                         grid[x][y] = new Cell(x+1, y+1);
                 }
         }
-
-        grid[0][0].addFact(new Fact(Fact.Type.EMPTY));
     }
     
     public void reset()
@@ -86,6 +84,9 @@ public class KnowledgeBase
                 Fact f = c.facts.get(i);
 
                 switch(f.type) {
+                    case EMPTY:
+                        handleEmpty(f, c.pos);
+                        break;
                     case STENCH:
                         handleStench(f, c.pos);
                         break;
@@ -109,7 +110,7 @@ public class KnowledgeBase
         
         for (Cell adj : adjacent) {
             if (adj != null) {
-                if (adj.unknown) {
+                if (!adj.safe) {
                     adj.wump++;
 
                     if (adj.wump >= 3)
@@ -119,22 +120,31 @@ public class KnowledgeBase
         }
     }
     
+    private void handleEmpty(Fact f, Vector2 pos) {
+        Cell[] adjacent = this.getAdjacent(pos);
+        for (Cell adj : adjacent) {
+            if (adj != null && adj.unknown && !adj.safe) {
+                adj.safe = true;
+            }
+        }
+    }
+    
     private void handleBreeze(Fact f, Vector2 pos) {
         Cell[] adjacent = this.getAdjacent(pos);
         
-        int unknownCount = 0;
+        ArrayList<Cell> unknownAdjacent = new ArrayList();
         for (Cell adj : adjacent) {
             if (adj != null && adj.unknown) {
-                unknownCount++;
+                unknownAdjacent.add(adj);
             }
         }
         
-        for (Cell adj : adjacent) {
-            if (adj != null && adj.unknown) {
-                adj.probPit += 1.f/unknownCount;
-                if (adj.probPit >= 1.0f)
-                    adj.addFact(new Fact(Fact.Type.PIT));
-            }
+        int unknownCount = unknownAdjacent.size();
+        for (int i = 0; i < unknownCount; i++) {
+            Cell unknown = unknownAdjacent.get(i);
+            float newPerc =  1.f/unknownCount;
+            if (unknown.probPit < newPerc)
+                unknown.probPit = 1.f/unknownCount;
         }
     }
 }

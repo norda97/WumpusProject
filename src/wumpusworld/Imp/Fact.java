@@ -17,7 +17,6 @@ public class Fact {
         STENCH,
         WUMPUS,
         PIT,
-        GLITTER,
         UNKNOWN
     }
     
