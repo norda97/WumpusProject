@@ -31,6 +31,8 @@ public class KnowledgeBase
         List<Node> visited = new ArrayList();
         Vector2 bestBet = new Vector2(start.pos.x, start.pos.y);
         Node startNode = getNeighbours(start, visited, bestBet);
+        
+        System.out.println("Best bet: (" + bestBet.x + ","+ bestBet.y + ")");
         System.out.println("###########################\n");
         return startNode;
     }
