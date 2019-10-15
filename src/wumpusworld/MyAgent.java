@@ -1,10 +1,12 @@
 package wumpusworld;
 
 import wumpusworld.Imp.KnowledgeBase;
+import wumpusworld.Imp.Node;
 
 import java.util.List;
 import java.util.ArrayList;
 
+import wumpusworld.Imp.AStar;
 import wumpusworld.Imp.Cell;
 import wumpusworld.Imp.Fact;
 import wumpusworld.Imp.Vector2;
@@ -132,6 +134,38 @@ public class MyAgent implements Agent
             int d = goodMoves.get(decideRandomMove(s));
             moveTo(d);
         }
+
+        // ============================ A* test ==============================
+        /*
+        Node[][] nodes = new Node[4][4];
+
+        for(int i = 1; i < 5; i++)
+            for(int j = 1; j < 5; j++)
+                nodes[i][j] = new Node(i, j);
+
+        for(int i = 1; i < 5; i++)
+        {
+            for(int j = 1; j < 5; j++)
+            {
+                Node n = nodes[i][j];
+                if(i+1 < 5)
+                    n.addNeighbour(nodes[i+1][j]);
+                if(i-1 >= 0)
+                    n.addNeighbour(nodes[i-1][j]);
+                if(j+1 < 5)
+                    n.addNeighbour(nodes[i][j+1]);
+                if(j-1 >= 0)
+                    n.addNeighbour(nodes[i][j-1]);
+            }
+        }
+
+        List<Node> path = AStar.make(nodes[1][1], nodes[4][4]);
+        for(Node node : path)
+        {
+            System.out.println("[" + Integer.toString(node.index.x) + ", " + Integer.toString(node.index.y) + "]");
+        }*/
+
+        // ===================================================================
 
         kb.reset();
     }
