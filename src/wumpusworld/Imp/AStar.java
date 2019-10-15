@@ -8,6 +8,7 @@ import wumpusworld.Imp.Vector2;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Collections;
 import wumpusworld.Imp.Node;
 import java.util.Set;
 import java.util.HashSet;
@@ -57,10 +58,8 @@ import java.util.HashMap;
                     continue;
                 }
                 
-                System.out.println("tmpGScore begin:");
                 float tmpGScore = gScore.get(current) + 1.0f;
-                System.out.println("tmpGScore: " + Float.toString(tmpGScore));
-
+                
                 float g = Float.MAX_VALUE;
                 if(gScore.containsKey(n))
                     g = gScore.get(n);
@@ -100,17 +99,20 @@ import java.util.HashMap;
     private static List<Node> getPath(Map<Node, Node> cameFrom, Node current)
     {
         List<Node> path = new ArrayList<Node>();
+        path.add(current);
         while(cameFrom.containsKey(current))
         {
             current = cameFrom.get(current);
             path.add(current);
         }
-        path.add(current);
+        Collections.reverse(path);
         return path;
     }
 
     private static float h(Node a, Node b)
     {
+        System.out.println("A: " + Boolean.toString(a == null));
+        System.out.println("B: " + Boolean.toString(b == null));
         Vector2 v = a.index;
         Vector2 u = b.index;
         return (float)Math.sqrt((float)(v.x*u.x) + (float)(v.y*u.y));

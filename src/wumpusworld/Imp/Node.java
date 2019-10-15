@@ -24,4 +24,9 @@ public class Node {
     public void addNeighbour(Node n) {
         this.neighbours.add(n);
     }
+
+    public String toString()
+    {
+        return this.index.toString() + ", #Neighbours: " + this.neighbours.size(); 
+    }
 }
