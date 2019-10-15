@@ -1,10 +1,12 @@
 package wumpusworld;
 
 import wumpusworld.Imp.KnowledgeBase;
+import wumpusworld.Imp.Node;
 
 import java.util.List;
 import java.util.ArrayList;
 
+import wumpusworld.Imp.AStar;
 import wumpusworld.Imp.Cell;
 import wumpusworld.Imp.Fact;
 import wumpusworld.Imp.Vector2;
