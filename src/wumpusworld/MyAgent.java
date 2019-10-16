@@ -21,6 +21,8 @@ public class MyAgent implements Agent
     private World w;
     int rnd;
     private KnowledgeBase kb;
+    private List<Node> currPath;
+    private int currPathIndex;
     
     /**
      * Creates a new instance of your solver agent.
@@ -31,6 +33,8 @@ public class MyAgent implements Agent
     {
         w = world;
         this.kb = new KnowledgeBase(4);
+        this.currPath = new ArrayList<Node>();
+        this.currPathIndex = 0;
     }
    
             
@@ -110,10 +114,37 @@ public class MyAgent implements Agent
             }
         }
         
-        kb.calcPathData(cX, cY);
-        Cell[] neighbours = kb.getAdjacent(new Vector2(cX, cY));
+        if (currPath.isEmpty()) {
+            kb.calcPathData(cX, cY);
+            Node[] startGoal = kb.calcPathData(cX, cY);        
+            AStar.make(startGoal[0], startGoal[1], this.currPath);
+            this.currPathIndex = 0;
+        }
+        else {
+            Node nextNode = this.currPath.get(this.currPathIndex++);
+            
+            int x = cX - nextNode.index.x;
+            int y = cY - nextNode.index.y;
+            
+            if (x != 0) {
+                if (x > 0)
+                    moveTo(World.DIR_RIGHT);
+                else if(x < 0)
+                    moveTo(World.DIR_LEFT);
+            }
+            else if (y != 0) {
+                if (y > 0)
+                    moveTo(World.DIR_UP);
+                else if(y < 0)
+                    moveTo(World.DIR_DOWN);
+            }
+            else
+                this.currPath.clear();
+        }
         
-        List<Integer> goodMoves = new ArrayList();
+        
+        /*
+        List<Integer> good Moves = new ArrayList();
         for(int i = 0; i < 4; i++)
         {
             Cell c = neighbours[i];
@@ -128,14 +159,14 @@ public class MyAgent implements Agent
                 }
             }
         }        
-
+       
         // Move to desired direction.
         int s = goodMoves.size();
         if (s > 0) {
             int d = goodMoves.get(decideRandomMove(s));
             moveTo(d);
         }
-
+        */
         kb.reset();
     }
 

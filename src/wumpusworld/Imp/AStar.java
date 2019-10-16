@@ -21,8 +21,8 @@ import java.util.HashMap;
 
  public class AStar
  {
-    public static List<Node> make(Node start, Node goal)
-    {
+    public static void make(Node start, Node goal, List<Node> path)
+    {      
         Set<Node> openSet = new HashSet<Node>();
         openSet.add(start);
         Set<Node> closedSet = new HashSet<Node>();
@@ -44,7 +44,8 @@ import java.util.HashMap;
             if(current == goal)
             {
                 // Return path.
-                return getPath(cameFrom, current);
+                getPath(cameFrom, current, path);
+                return;
             }
 
             openSet.remove(current);
@@ -73,11 +74,8 @@ import java.util.HashMap;
                         openSet.add(n);
                 }
             }
-
         }
-
-        // Return an empty list if no path was found.
-        return new ArrayList<Node>(); 
+        return;
     }
 
     private static Node getLowest(Set<Node> set, Map<Node, Float> map)
@@ -96,9 +94,8 @@ import java.util.HashMap;
         return loNode;
     }
 
-    private static List<Node> getPath(Map<Node, Node> cameFrom, Node current)
+    private static void getPath(Map<Node, Node> cameFrom, Node current, List<Node> path)
     {
-        List<Node> path = new ArrayList<Node>();
         path.add(current);
         while(cameFrom.containsKey(current))
         {
@@ -106,7 +103,6 @@ import java.util.HashMap;
             path.add(current);
         }
         Collections.reverse(path);
-        return path;
     }
 
     private static float h(Node a, Node b)
