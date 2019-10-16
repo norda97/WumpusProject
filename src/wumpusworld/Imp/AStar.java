@@ -107,8 +107,6 @@ import java.util.HashMap;
 
     private static float h(Node a, Node b)
     {
-        System.out.println("A: " + Boolean.toString(a == null));
-        System.out.println("B: " + Boolean.toString(b == null));
         Vector2 v = a.index;
         Vector2 u = b.index;
         return (float)Math.sqrt((float)(v.x*u.x) + (float)(v.y*u.y));
