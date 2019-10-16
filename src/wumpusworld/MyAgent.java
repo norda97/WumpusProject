@@ -109,7 +109,8 @@ public class MyAgent implements Agent
                 w.probs[i][j][1] = c.wump;
             }
         }
-
+        
+        kb.calcPathData(cX, cY);
         Cell[] neighbours = kb.getAdjacent(new Vector2(cX, cY));
         
         List<Integer> goodMoves = new ArrayList();

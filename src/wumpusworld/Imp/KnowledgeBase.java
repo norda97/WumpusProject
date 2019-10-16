@@ -1,5 +1,6 @@
 package wumpusworld.Imp;
 
+import wumpusworld.Imp.Node;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,65 @@ public class KnowledgeBase
                         grid[x][y] = new Cell(x+1, y+1);
                 }
         }
+    }
+    
+    public Node calcPathData(int cx, int cy) {
+        
+        Cell start = grid[cx-1][cy-1];
+        List<Node> visited = new ArrayList();
+        Vector2 bestBet = new Vector2(start.pos.x, start.pos.y);
+        Node startNode = getNeighbours(start, visited, bestBet);
+        
+        System.out.println("Best bet: (" + bestBet.x + ","+ bestBet.y + ")");
+        System.out.println("###########################\n");
+        return startNode;
+    }
+    
+    private Node getNeighbours(Cell c, List<Node> visited, Vector2 bb) {
+        
+        Cell[] adjacent = getAdjacent(new Vector2(c.pos.x, c.pos.y));
+        
+        Node currNode = new Node(c.pos.x, c.pos.y);
+        visited.add(currNode);
+        
+        for (Cell adj : adjacent) {
+            if (adj != null) {
+                if (adj.safe) {
+                    boolean alreadyExists = false;
+                    for (int i = 0; i < visited.size(); i++) {
+                        Node n = visited.get(i);
+
+                        if(adj.pos.x == n.index.x &&
+                                adj.pos.y == n.index.y) {
+                            alreadyExists = true;
+                        }
+                    }
+                    Node n;
+                    if (!alreadyExists)
+                        n = getNeighbours(adj, visited, bb);
+                    else   
+                        n = new Node(adj.pos.x, adj.pos.y);
+                    currNode.addNeighbour(n);    
+
+                }
+                else {
+                    if (adj.probPit < grid[bb.x-1][bb.y-1].probPit) {
+                        bb.x = adj.pos.x;
+                        bb.y = adj.pos.y;
+                    }
+                }
+            }
+        }
+        System.out.println("Added (" + currNode.index.x +
+                                ", " + currNode.index.y + ")");
+        
+        for (int i = 0; i < currNode.neighbours.size(); i++) {
+            Node n = currNode.neighbours.get(i);
+            System.out.println("    Neigh(" + n.index.x +
+                                ", " + n.index.y + ")");
+        }
+        
+        return currNode;
     }
     
     public void reset()
