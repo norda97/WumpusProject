@@ -20,7 +20,7 @@ public class Cell {
     public boolean safe;
     
     public Cell(int x, int y) {
-        this.facts = new ArrayList();
+        this.facts = new ArrayList<Fact>();
         this.pos = new Vector2(x, y);
         this.wump = 0;
         this.probPit = 0.0f;

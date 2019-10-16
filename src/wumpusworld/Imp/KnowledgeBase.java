@@ -15,8 +15,8 @@ public class KnowledgeBase
     {
         this.size = gridSize;
         this.grid = new Cell[gridSize][gridSize];
-        this.knownStenches = new ArrayList();
-        this.knownBreezes = new ArrayList();
+        this.knownStenches = new ArrayList<Vector2>();
+        this.knownBreezes = new ArrayList<Vector2>();
 
         for (int x = 0; x < this.size; x++) {
                 for (int y = 0; y < this.size; y++) {
@@ -28,7 +28,7 @@ public class KnowledgeBase
     public Node[] calcPathData(int cx, int cy) {
         
         Cell start = grid[cx-1][cy-1];
-        List<Node> visited = new ArrayList();
+        List<Node> visited = new ArrayList<Node>();
         Vector2 bestBet = new Vector2(start.pos.x, start.pos.y);
         Node[] result = new Node[2];
         result[0] = getSafeNeighbours(start, visited, bestBet);
@@ -163,6 +163,8 @@ public class KnowledgeBase
                     case WUMPUS:
                         c.wump = 3;
                         break;
+                    default:
+                        break;
                 }
             }
         }
@@ -195,7 +197,7 @@ public class KnowledgeBase
     private void handleBreeze(Fact f, Vector2 pos) {
         Cell[] adjacent = this.getAdjacent(pos);
         
-        ArrayList<Cell> unknownAdjacent = new ArrayList();
+        ArrayList<Cell> unknownAdjacent = new ArrayList<Cell>();
         for (Cell adj : adjacent) {
             if (adj != null && adj.unknown) {
                 unknownAdjacent.add(adj);

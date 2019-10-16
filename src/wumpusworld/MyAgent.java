@@ -2,6 +2,7 @@ package wumpusworld;
 
 import wumpusworld.Imp.KnowledgeBase;
 import wumpusworld.Imp.Node;
+import wumpusworld.Imp.Env;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class MyAgent implements Agent
      */
     public MyAgent(World world)
     {
-        w = world;
+        this.w = world;
         this.kb = new KnowledgeBase(4);
         this.currPath = new ArrayList<Node>();
         this.currPathIndex = 0;

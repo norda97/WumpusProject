@@ -18,7 +18,7 @@ public class Node {
    
     public Node(int x, int y) {
         this.index = new Vector2(x, y);
-        this.neighbours = new ArrayList();
+        this.neighbours = new ArrayList<Node>();
     }
     
     public void addNeighbour(Node n) {
