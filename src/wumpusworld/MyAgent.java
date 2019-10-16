@@ -118,30 +118,16 @@ public class MyAgent implements Agent
             kb.calcPathData(cX, cY);
             Node[] startGoal = kb.calcPathData(cX, cY);        
             AStar.make(startGoal[0], startGoal[1], this.currPath);
-            this.currPathIndex = 0;
-        }
-        else {
-            Node nextNode = this.currPath.get(this.currPathIndex++);
-            
-            int x = cX - nextNode.index.x;
-            int y = cY - nextNode.index.y;
-            
-            if (x != 0) {
-                if (x > 0)
-                    moveTo(World.DIR_RIGHT);
-                else if(x < 0)
-                    moveTo(World.DIR_LEFT);
-            }
-            else if (y != 0) {
-                if (y > 0)
-                    moveTo(World.DIR_UP);
-                else if(y < 0)
-                    moveTo(World.DIR_DOWN);
-            }
-            else
-                this.currPath.clear();
+            this.currPathIndex = 1;
         }
         
+        Node nextNode = this.currPath.get(this.currPathIndex);
+        moveTo(getDirection(cX, cY, nextNode.index.x, nextNode.index.y));
+        if(this.currPathIndex == (this.currPath.size()-1)) {
+            this.currPath.clear();
+        }
+        this.currPathIndex++;
+
         
         /*
         List<Integer> good Moves = new ArrayList();
@@ -169,7 +155,29 @@ public class MyAgent implements Agent
         */
         kb.reset();
     }
+    
+    private int getDirection(int cX, int cY, int nX, int nY) {
+        Node nextNode = this.currPath.get(this.currPathIndex);
+            
+        int x = nextNode.index.x - cX;
+        int y = nextNode.index.y - cY;
 
+        if (x != 0) {
+            if (x > 0)
+                return World.DIR_RIGHT;
+            else if(x < 0)
+                return World.DIR_LEFT;
+        }
+        else if (y != 0) {
+            if (y > 0)
+                return World.DIR_UP;
+            else if(y < 0)
+                return World.DIR_DOWN;
+        }
+        System.out.println("Couldn't find dir!");
+        return World.DIR_DOWN;
+    }
+    
     private void moveTo(int dir)
     {
         for(int i = 0; i < 4; i++)

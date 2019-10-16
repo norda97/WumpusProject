@@ -41,7 +41,7 @@ import java.util.HashMap;
         {
             // Get the node which has lowest fScore.
             Node current = getLowest(openSet, fScore);
-            if(current == goal)
+            if(current.index.equals(goal.index))
             {
                 // Return path.
                 getPath(cameFrom, current, path);
@@ -54,10 +54,15 @@ import java.util.HashMap;
             List<Node> neighbours = current.neighbours;
             for(Node n : neighbours)
             {
-                if(closedSet.contains(n))
-                {
-                    continue;
+                boolean exists = false;
+                for(Node node : closedSet) {
+                    if (node.index.equals(n.index))
+                        exists = true;
                 }
+                
+                if (exists)
+                    continue;
+                
                 
                 float tmpGScore = gScore.get(current) + 1.0f;
                 
@@ -70,7 +75,14 @@ import java.util.HashMap;
                     cameFrom.put(n, current);
                     gScore.put(n, tmpGScore);
                     fScore.put(n, tmpGScore + h(n, goal));
-                    if(openSet.contains(n) == false)
+                    
+                    exists = false;
+                    for(Node node : openSet) {
+                        if (node.index.equals(n.index))
+                            exists = true;
+                    }
+
+                    if (!exists)
                         openSet.add(n);
                 }
             }

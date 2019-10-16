@@ -70,11 +70,12 @@ public class KnowledgeBase
                     if (adj.probPit < grid[bb.x-1][bb.y-1].probPit || !grid[bb.x-1][bb.y-1].unknown) {
                         bb.x = adj.pos.x;
                         bb.y = adj.pos.y;
+                        currNode.addNeighbour(new Node(adj.pos.x, adj.pos.y));
                     }
                 }
             }
         }
-        /*System.out.println("Added (" + currNode.index.x +
+        System.out.println("Added (" + currNode.index.x +
                                 ", " + currNode.index.y + ")");
         
         for (int i = 0; i < currNode.neighbours.size(); i++) {
@@ -82,7 +83,7 @@ public class KnowledgeBase
             System.out.println("    Neigh(" + n.index.x +
                                 ", " + n.index.y + ")");
         }
-        */
+        
         return currNode;
     }
     
