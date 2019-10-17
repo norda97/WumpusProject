@@ -21,10 +21,6 @@ public class Env
     {
         switch(percepts) 
         {
-            case World.BREEZE:
-                return canBeBreeze(x, y);
-            case World.STENCH:
-                return canBeStench(x, y);
             case World.PIT:
                 return canBePit(x, y);
             case World.WUMPUS:
@@ -34,32 +30,17 @@ public class Env
         }
     }
 
-    private boolean canBeBreeze(int x, int y)
-    {
-        boolean legal = false;
-        for(int i = -1; i < 2; i+=2)
-            for(int j = -1; j < 2; j+=2)
-                legal |= this.w.hasPit(x+i, y+j);
-        return legal;
-    }
-
-    private boolean canBeStench(int x, int y)
-    {
-        boolean legal = false;
-        for(int i = -1; i < 2; i+=2)
-            for(int j = -1; j < 2; j+=2)
-                legal |= this.w.hasWumpus(x+i, y+j);
-        return legal;
-    }
-
     private boolean canBePit(int x, int y)
     {
         boolean legal = true;
-        for(int i = -1; i < 2; i+=2)
-            for(int j = -1; j < 2; j+=2)
+        for(int i = -1; i < 2; i++)
+            for(int j = -1; j < 2; j++)
             {
-                if(this.w.isValidPosition(x+i, y+j))
-                    legal &= this.w.hasBreeze(x+i, y+j);
+                if(Math.abs(i) != Math.abs(j))
+                {
+                    if(this.w.isValidPosition(x+i, y+j))
+                        legal &= this.w.hasBreeze(x+i, y+j);
+                }
             }
         return legal;  
     }
@@ -67,11 +48,14 @@ public class Env
     private boolean canBeWumpus(int x, int y)
     {
         boolean legal = true;
-        for(int i = -1; i < 2; i+=2)
-            for(int j = -1; j < 2; j+=2)
+        for(int i = -1; i < 2; i++)
+            for(int j = -1; j < 2; j++)
             {
-                if(this.w.isValidPosition(x+i, y+j))
-                    legal &= this.w.hasStench(x+i, y+j);
+                if(Math.abs(i) != Math.abs(j))
+                {
+                    if(this.w.isValidPosition(x+i, y+j))
+                        legal &= this.w.hasStench(x+i, y+j);
+                }
             }
         return legal;
     }
@@ -80,13 +64,17 @@ public class Env
     {
         if(isLegal(x, y, World.PIT) == false) return false;
 
-        for(int i = -1; i < 2; i+=2) {
-            for(int j = -1; j < 2; j+=2) {
-                if(this.w.hasBreeze(x+i, y+j))
+        for(int i = -1; i < 2; i++) {
+            for(int j = -1; j < 2; j++)
+            {
+                if(Math.abs(i) != Math.abs(j))
                 {
-                    int u = getNumUnknownNeighbours(x+i, y+i);
-                    int n = getNumNeighboursWithPit(x+i, y+i);
-                    if(n == 0 && u == 1) return true;
+                    if(this.w.hasBreeze(x+i, y+j))
+                    {
+                        int u = getNumUnknownNeighbours(x+i, y+i);
+                        int n = getNumNeighboursWithPit(x+i, y+i);
+                        if(n == 0 && u == 1) return true;
+                    }
                 }
             }
         }
@@ -98,13 +86,17 @@ public class Env
         if(isLegal(x, y, World.WUMPUS) == false) return false;
         
         int numNeighboursWithStench = 0;
-        for(int i = -1; i < 2; i+=2) {
-            for(int j = -1; j < 2; j+=2) {
-                if(this.w.hasStench(x+i, y+j))
+        for(int i = -1; i < 2; i++) {
+            for(int j = -1; j < 2; j++)
+            {
+                if(Math.abs(i) != Math.abs(j))
                 {
-                    numNeighboursWithStench++;
-                    int u = getNumUnknownNeighbours(x+i, y+i);
-                    if(u == 1) return true;
+                    if(this.w.hasStench(x+i, y+j))
+                    {
+                        numNeighboursWithStench++;
+                        int u = getNumUnknownNeighbours(x+i, y+i);
+                        if(u == 1) return true;
+                    }
                 }
             }
         }
@@ -114,15 +106,19 @@ public class Env
     private int getNumNeighboursWithPit(int x, int y)
     {
         int n = 0;
-        for(int i = -1; i < 2; i+=2) {
-            for(int j = -1; j < 2; j+=2) {
-                if(this.w.isValidPosition(x+i, y+j))
+        for(int i = -1; i < 2; i++) {
+            for(int j = -1; j < 2; j++)
+            {
+                if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.hasPit(x+i, y+j)) 
-                        n++;
-                    else if(this.w.isUnknown(x+i, y+j))
-                        if(isLegal(x+i, y+j, World.PIT))
+                    if(this.w.isValidPosition(x+i, y+j))
+                    {
+                        if(this.w.hasPit(x+i, y+j)) 
                             n++;
+                        else if(this.w.isUnknown(x+i, y+j))
+                            if(isLegal(x+i, y+j, World.PIT))
+                                n++;
+                    }
                 }
             }
         }
@@ -132,10 +128,14 @@ public class Env
     private int getNumUnknownNeighbours(int x, int y)
     {
         int n = 0;
-        for(int i = -1; i < 2; i+=2) {
-            for(int j = -1; j < 2; j+=2) {
-                if(this.w.isUnknown(x+i, y+j)) 
-                    n++;
+        for(int i = -1; i < 2; i++) {
+            for(int j = -1; j < 2; j++)
+            {
+                if(Math.abs(i) != Math.abs(j))
+                {
+                    if(this.w.isUnknown(x+i, y+j)) 
+                        n++;
+                }
             }
         }
         return n;
