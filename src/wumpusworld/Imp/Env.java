@@ -60,8 +60,9 @@ public class Env
         return legal;
     }
 
-    public boolean mustBePit(int x, int y)
+    public boolean mustBePit(int x, int y, int pitsFound)
     {
+        if(pitsFound >= 3) return false;
         if(isLegal(x, y, World.PIT) == false) return false;
 
         for(int i = -1; i < 2; i++) {
@@ -81,8 +82,9 @@ public class Env
         return false;
     }
 
-    public boolean mustBeWumpus(int x, int y)
+    public boolean mustBeWumpus(int x, int y, boolean wumpusFound)
     {
+        if(wumpusFound) return false;
         if(isLegal(x, y, World.WUMPUS) == false) return false;
         
         int numNeighboursWithStench = 0;
@@ -111,14 +113,8 @@ public class Env
             {
                 if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.isValidPosition(x+i, y+j))
-                    {
-                        if(this.w.hasPit(x+i, y+j)) 
-                            n++;
-                        else if(this.w.isUnknown(x+i, y+j))
-                            if(isLegal(x+i, y+j, World.PIT))
-                                n++;
-                    }
+                    if(this.w.hasPit(x+i, y+j)) 
+                        n++;
                 }
             }
         }
