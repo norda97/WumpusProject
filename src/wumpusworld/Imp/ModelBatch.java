@@ -53,7 +53,7 @@ public class ModelBatch
                 if(this.env.isLegal(f.x, f.y, World.PIT))
                 {
                     pitCount++;
-                    if(this.env.mustBePit(f.x, f.y)) 
+                    if(false)
                         mustBePitCount++;
                 }
             }
@@ -68,7 +68,7 @@ public class ModelBatch
                 if(this.env.isLegal(f.x, f.y, World.WUMPUS))
                 {
                     wumpusCount++;
-                    if(this.env.mustBeWumpus(f.x, f.y))
+                    if(false)
                     {
                         wumpusFound = true;
                         wumpusCount = 1;

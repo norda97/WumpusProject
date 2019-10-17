@@ -9,9 +9,6 @@ public class KnowledgeBase
 {       
     public Cell[][] grid;
     
-    private ModelBatch mb;
-    private Env env;
-    
     private int knownPits;
     private boolean wumpusFound;
     private List<Vector2> knownStenches; 
@@ -33,17 +30,146 @@ public class KnowledgeBase
         
         this.knownPits = 0;
         this.wumpusFound = false;
-        
-        
-        this.mb = new ModelBatch();
-        this.env = new Env();
-        this.env.setWorld(w);
 
         for (int x = 0; x < this.size; x++) {
                 for (int y = 0; y < this.size; y++) {
                         grid[x][y] = new Cell(x+1, y+1);
                 }
         }
+    }
+    
+    public KnowledgeBase(KnowledgeBase other) {
+        this.size = other.size;
+        this.grid = other.grid.clone();
+        this.knownPits = other.knownPits;
+        this.wumpusFound = other.wumpusFound;
+        
+        for (Vector2 c : other.knownStenches)
+            this.knownStenches.add(new Vector2(c.x, c.y));
+        
+        for (Vector2 c : other.knownBreezes)
+            this.knownBreezes.add(new Vector2(c.x, c.y));
+        
+        for (Vector2 c : other.Frontier)
+            this.Frontier.add(new Vector2(c.x, c.y));
+        
+        this.grid = new Cell[this.size][this.size];
+        
+        for (int x = 0; x < this.size; x++) {
+                for (int y = 0; y < this.size; y++) {
+                        grid[x][y] = other.grid[x][y].clone();
+                }
+        }
+    }
+    
+    public boolean hasPit(int x, int y) {
+         if (!isValidPosition(x, y))
+            return false;
+        Cell c = grid[x-1][y-1];
+        
+        boolean pit = false;
+        for (Fact f : c.facts) 
+            if (f.type == Fact.Type.PIT)
+                pit = true;
+        
+        return pit;
+    }
+    
+    public boolean hasStench(int x, int y) {
+         if (!isValidPosition(x, y))
+            return false;
+        Cell c = grid[x-1][y-1];
+        
+        boolean res = false;
+        for (Fact f : c.facts) 
+            if (f.type == Fact.Type.STENCH)
+                res = true;
+        
+        return res;
+    }
+    
+    public boolean hasWumpus(int x, int y) {
+         if (!isValidPosition(x, y))
+            return false;
+         
+        Cell c = grid[x-1][y-1];
+        boolean res = false;
+        for (Fact f : c.facts) 
+            if (f.type == Fact.Type.WUMPUS)
+                res = true;
+        
+        return res;
+    }
+    
+    public boolean hasBreeze(int x, int y) {
+        if (!isValidPosition(x, y))
+            return false;
+        
+        Cell c = grid[x-1][y-1];
+        boolean res = false;
+        for (Fact f : c.facts) 
+            if (f.type == Fact.Type.BREEZE)
+                res = true;
+        
+        return res;
+    }
+    
+    public boolean isUnknown(int x, int y) {
+         if (!isValidPosition(x, y))
+            return false;
+        Cell c = grid[x-1][y-1];
+        
+        return c.unknown;
+    }
+    
+    public boolean isValidPosition(int x, int y) {
+        if (x < 1) return false;
+        if (y < 1) return false;
+        if (x > size) return false;
+        if (y > size) return false;
+        return true;
+    }
+    
+    public boolean addPit(int x, int y) {
+        if (!hasPit(x, y)) {
+            Cell c = grid[x-1][y-1];
+            c.addFact(new Fact(Fact.Type.PIT));
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean removePit(int x, int y) {
+        Cell c = grid[x-1][y-1];
+        for (int i = 0; i < c.facts.size(); i++) {
+            Fact f = c.facts.get(i);
+            if (f.type == Fact.Type.PIT) {
+                c.facts.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean addWumpus(int x, int y) {
+         if (!hasWumpus(x, y)) {
+            Cell c = grid[x-1][y-1];
+            c.addFact(new Fact(Fact.Type.WUMPUS));
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean removeWumpus(int x, int y) {
+        Cell c = grid[x-1][y-1];
+        for (int i = 0; i < c.facts.size(); i++) {
+            Fact f = c.facts.get(i);
+            if (f.type == Fact.Type.WUMPUS) {
+                c.facts.remove(i);
+                return true;
+            }
+        }
+        return false;
     }
     
     public Node[] calcPathData(int cx, int cy) {

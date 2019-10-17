@@ -28,6 +28,19 @@ public class Cell {
         this.safe = false;
     }
     
+    public Cell clone() {
+        Cell clone = new Cell(this.pos.x, this.pos.y);
+        clone.probWump = this.probWump;
+        clone.probPit = this.probPit;
+        clone.unknown = this.unknown;
+        clone.safe = this.safe;
+        
+        for (Fact f : this.facts)
+            clone.facts.add(new Fact(f.type));
+        
+        return clone;
+    }
+    
     public void addFact(Fact f) {
         this.facts.add(f);
         this.unknown = false;
