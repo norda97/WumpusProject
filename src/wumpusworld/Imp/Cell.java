@@ -34,6 +34,7 @@ public class Cell {
         clone.probPit = this.probPit;
         clone.unknown = this.unknown;
         clone.safe = this.safe;
+        clone.facts = new ArrayList<Fact>();
         
         for (Fact f : this.facts)
             clone.facts.add(new Fact(f.type));
