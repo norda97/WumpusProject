@@ -38,7 +38,7 @@ public class Env
             {
                 if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.isValidPosition(x+i, y+j))
+                    if(this.w.isUnknown(x+i, y+j) == false && this.w.isValidPosition(x+i, y+j))
                         legal &= this.w.hasBreeze(x+i, y+j);
                 }
             }
@@ -53,7 +53,7 @@ public class Env
             {
                 if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.isValidPosition(x+i, y+j))
+                    if(this.w.isUnknown(x+i, y+j) == false && this.w.isValidPosition(x+i, y+j))
                         legal &= this.w.hasStench(x+i, y+j);
                 }
             }
