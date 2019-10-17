@@ -32,7 +32,7 @@ public class ModelBatch
         List<Vector2> frontier = new ArrayList<Vector2>();
         for(Vector2 v : this.kb.Frontier)
         {
-            if(v.x != x && v.y != y)
+            if(v.x != x || v.y != y)
                 frontier.add(v);
         }
 
@@ -125,7 +125,8 @@ public class ModelBatch
             for(int w = 0; w <= wumpLeft; w++)
             {
                 int nn = nLegalWumpPos > n-p ? n-p : nLegalWumpPos;
-                wumpComb *= binomial(nn, w);
+                if (nn > 0)
+                    wumpComb *= binomial(nn, w);
             }
             // Total number of combinations of nPits and wumpusPositions for this iteration.
             int totComb = pitsComb*wumpComb;
@@ -148,7 +149,7 @@ public class ModelBatch
     {
         int ret = 1;
         for(int i = 0; i < k; i++) {
-            ret *= (n-k) / (k+1); 
+            ret *= (n-i) / (i+1); 
         }
         return ret;
     }

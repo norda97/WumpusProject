@@ -243,8 +243,8 @@ public class KnowledgeBase
     {
         for(int i = 0; i < this.size; i++) {
             for(int j = 0; j < this.size; j++) {
-                grid[i][j].probWump = 0.f;
-                grid[i][j].probPit = 0.f;
+                grid[i][j].probWump = 1.f;
+                grid[i][j].probPit = 1.f;
             }
         }
     }
