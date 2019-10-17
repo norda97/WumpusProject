@@ -195,20 +195,6 @@ public class KnowledgeBase
     }
     
     private void calcProbs(int x, int y) {
-        // Calculate pit prob
-        if (env.isLegal(x, y, "PIT")) {
-            
-        }
-        else {
-            this.grid[x-1][y-1].probPit = 0.f;
-        }
-        // Calculate wumpus prob
-        if (env.isLegal(x, y, "WUMPUS")) {
-            
-        }
-        else {
-            this.grid[x-1][y-1].probWump = 0.f;
-        }
         
     }
     
