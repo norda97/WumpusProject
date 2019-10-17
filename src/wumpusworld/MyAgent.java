@@ -21,6 +21,7 @@ public class MyAgent implements Agent
     int rnd;
     
     private KnowledgeBase kb;
+    private ModelBatch mb;
     
     private List<Node> currPath;
     private int currPathIndex;
@@ -35,6 +36,7 @@ public class MyAgent implements Agent
         this.w = world;
         
         this.kb = new KnowledgeBase(this.w);
+        this.mb = new ModelBatch(this.kb);
         
         this.currPath = new ArrayList<Node>();
         this.currPathIndex = 0;
@@ -81,6 +83,7 @@ public class MyAgent implements Agent
         if (w.hasPit(cX, cY))
         {
             kb.addType(new Vector2(cX, cY), Fact.Type.PIT);
+            kb.knownPits++;
             System.out.println("I am in a Pit");
         }
         if(kb.grid[cX-1][cY-1].unknown) {
@@ -108,17 +111,19 @@ public class MyAgent implements Agent
         kb.update();
         
         // Update GUI numbers
-        for(int i = 0; i < kb.size; i++) {
-            for(int j = 0; j < kb.size; j++) {
-                Cell c = kb.grid[i][j];
-                
-                w.probs[i][j][0] = c.probPit;
-                w.probs[i][j][1] = c.probWump;
-            }
+        for(Vector2 v : this.kb.Frontier) {
+            Cell c = kb.grid[v.x-1][v.y-1];
+            
+            c.probPit = (float)this.mb.predict(3-kb.knownPits, true, v.x, v.y, World.PIT);
+            c.probWump = (float)this.mb.predict(3-kb.knownPits, true, v.x, v.y, World.WUMPUS);
+
+            System.out.println("ProbPit: " + Float.toString(c.probPit) + ", ProbWump: " + Float.toString(c.probWump));
+
+            w.probs[v.x-1][v.y-1][0] = c.probPit;
+            w.probs[v.x-1][v.y-1][1] = c.probWump;
         }
         
         if (currPath.isEmpty()) {
-            kb.calcPathData(cX, cY);
             Node[] startGoal = kb.calcPathData(cX, cY);        
             AStar.make(startGoal[0], startGoal[1], this.currPath);
             this.currPathIndex = 1;

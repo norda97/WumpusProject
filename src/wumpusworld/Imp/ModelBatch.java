@@ -5,15 +5,21 @@ import wumpusworld.Imp.Node;
 import wumpusworld.Imp.Env;
 
 import java.util.List;
+import java.util.ArrayList;
 
+import wumpusworld.Imp.KnowledgeBase;
 import wumpusworld.World;
 
 public class ModelBatch
 {
     public List<Vector2> frontier;
     
-    private WorldKnowledgeBase kb;
+    private KnowledgeBase kb;
     private Env env;
+
+    
+    static final double probP = 3.0/15.0;
+    static final double probW = 1.0/15.0;
     
     public ModelBatch(KnowledgeBase kb)
     {
@@ -21,14 +27,19 @@ public class ModelBatch
         this.env = new Env();
     }
 
-    public double predict(int pitLeft, boolean wumpusLeft, List<Vector2> frontier, int x, int y, String prediction)
+    public double predict(int pitLeft, boolean wumpusLeft, int x, int y, String prediction)
     {
-        // Copy world and set it to current.
-        KnowledgeBase kbCpy = this.kb.clone();
-        this.env.setWorld(wCpy);
+        List<Vector2> frontier = new ArrayList<Vector2>();
+        for(Vector2 v : this.kb.Frontier)
+        {
+            if(v.x != x && v.y != y)
+                frontier.add(v);
+        }
 
-        final double probP = 3.0/15.0;
-        final double probW = 1.0/15.0;
+        // Copy world and set it to current.
+        KnowledgeBase kbCpy = new KnowledgeBase(this.kb);
+        this.env.setKB(kbCpy);
+
         double sumModelsProbPositive = 0.0;
         double sumModelsProbNegative = 0.0;
 
@@ -43,16 +54,23 @@ public class ModelBatch
             break;
         }
 
-        // We will not ignore the query type when calculating positive probability.
-        this.env.resetQuery();
+        sumModelsProbPositive = getProbFromModels(pitLeft, wumpusLeft, frontier, x, y);
+        
+        kbCpy = null;
+        kbCpy = new KnowledgeBase(this.kb);
+        this.env.setKB(kbCpy);
+        switch(prediction)
+        {
+            case World.PIT:
+                kbCpy.addPit(x, y);
+            break;
+            case World.WUMPUS:
+                kbCpy.addWumpus(x, y);
+            break;
+        }
 
-        sumModelsProbPositive = getProbFromModels(pitLeft, wumpusLeft, frontier, x, y);
-        
-        // We will ignore the query type when calculating negative probability.
-        this.env.ignoreQuery(new Vector2(x, y));
-        
         // Calc combinations and probabilities when pit/wumpus is not present.
-        sumModelsProbPositive = getProbFromModels(pitLeft, wumpusLeft, frontier, x, y);
+        sumModelsProbNegative = getProbFromModels(pitLeft, wumpusLeft, frontier, x, y);
 
         // Calculate probability.
         double prob = 0.0;
@@ -63,7 +81,7 @@ public class ModelBatch
         
         double probPositive = sumModelsProbPositive * prob;
         double probNegative = sumModelsProbNegative * (1.0 - prob);
-        sum = probPositive+probNegative;
+        double sum = probPositive+probNegative;
 
         return probPositive/sum;
     }
@@ -103,7 +121,8 @@ public class ModelBatch
             int pitsComb = binomial(nLegalPitPos, p);
             // Can also be no wumpus if wumpus left, check it!
             int wumpComb = 1;
-            for(int w = 0; w <= (int)wumpusLeft; w++)
+            int wumpLeft = wumpusLeft ? 1 : 0;
+            for(int w = 0; w <= wumpLeft; w++)
             {
                 int nn = nLegalWumpPos > n-p ? n-p : nLegalWumpPos;
                 wumpComb *= binomial(nn, w);
@@ -116,8 +135,8 @@ public class ModelBatch
                 // Multiply with the probability that it is not a pit and wumput too.
                 double modelProbPit = Math.pow(probP, p)*Math.pow(1.0-probP, nLegalPitPos-p);
                 double modelProbWump = 1.0;
-                if(nLegalWumpPos != 0)
-                    modelProbWump = Math.pow(probW, (int)wumpusLeft) * Math.pow(1.0 - probW, (int)(!wumpusLeft));
+                if(nLegalWumpPos != 0 && wumpLeft != 0)
+                    modelProbWump = Math.pow(probW, wumpLeft) * Math.pow(1.0 - probW, 1 - wumpLeft);
                 probResult += modelProbPit*modelProbWump;
             }
         }

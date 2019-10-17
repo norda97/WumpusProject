@@ -2,6 +2,7 @@ package wumpusworld.Imp;
 
 import wumpusworld.World;
 import java.util.List;
+import java.util.ArrayList;
 import wumpusworld.Imp.KnowledgeBase;
 
 public class Env

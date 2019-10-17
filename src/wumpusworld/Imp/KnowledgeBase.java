@@ -9,11 +9,11 @@ public class KnowledgeBase
 {       
     public Cell[][] grid;
     
-    private int knownPits;
-    private boolean wumpusFound;
+    public int knownPits;
+    public boolean wumpusFound;
     private List<Vector2> knownStenches; 
     private List<Vector2> knownBreezes; 
-    private List<Vector2> Frontier; 
+    public List<Vector2> Frontier; 
     public int size;
 
     public KnowledgeBase(World w) 
@@ -40,9 +40,12 @@ public class KnowledgeBase
     
     public KnowledgeBase(KnowledgeBase other) {
         this.size = other.size;
-        this.grid = other.grid.clone();
         this.knownPits = other.knownPits;
         this.wumpusFound = other.wumpusFound;
+
+        this.knownStenches = new ArrayList<Vector2>();
+        this.knownBreezes = new ArrayList<Vector2>();
+        this.Frontier = new ArrayList<Vector2>();
         
         for (Vector2 c : other.knownStenches)
             this.knownStenches.add(new Vector2(c.x, c.y));
@@ -134,6 +137,7 @@ public class KnowledgeBase
         if (!hasPit(x, y)) {
             Cell c = grid[x-1][y-1];
             c.addFact(new Fact(Fact.Type.PIT));
+            c.unknown = false;
             return true;
         }
         return false;
@@ -145,6 +149,7 @@ public class KnowledgeBase
             Fact f = c.facts.get(i);
             if (f.type == Fact.Type.PIT) {
                 c.facts.remove(i);
+                c.unknown = false;
                 return true;
             }
         }
@@ -247,13 +252,13 @@ public class KnowledgeBase
     public Cell[] getAdjacent(Vector2 pos) {
         Cell[] neighbours = new Cell[4];
         
-        if (pos.y+1 <= this.size) // Up
+        if (isValidPosition(pos.x, pos.y+1)) // Up
             neighbours[0] = grid[(pos.x)-1][(pos.y+1)-1];
-        if (pos.x+1 <= this.size) // Right
+        if (isValidPosition(pos.x+1, pos.y)) // Right
             neighbours[1] = grid[(pos.x+1)-1][(pos.y)-1];
-        if (pos.y-1 >= 1) // Down
+        if (isValidPosition(pos.x, pos.y-1)) // Down
             neighbours[2] = grid[(pos.x)-1][(pos.y-1)-1];
-        if (pos.x-1 >= 1) // Left
+        if (isValidPosition(pos.x-1, pos.y)) // Left
             neighbours[3] = grid[(pos.x-1)-1][(pos.y)-1];
 
         return neighbours;
