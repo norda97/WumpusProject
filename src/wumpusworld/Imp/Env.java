@@ -2,19 +2,19 @@ package wumpusworld.Imp;
 
 import wumpusworld.World;
 import java.util.List;
-import java.util.ArrayList;
+import wumpusworld.Imp.KnowledgeBase;
 
 public class Env
 {
-    private World w;
+    private KnowledgeBase kb;
 
     public Env()
     {
     }
 
-    public void setWorld(World w)
+    public void setKB(KnowledgeBase kb)
     {
-        this.w = w;
+        this.kb = kb;
     }
 
     public boolean isLegal(int x, int y, String percepts)
@@ -38,8 +38,8 @@ public class Env
             {
                 if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.isUnknown(x+i, y+j) == false && this.w.isValidPosition(x+i, y+j))
-                        legal &= this.w.hasBreeze(x+i, y+j);
+                    if(this.kb.isUnknown(x+i, y+j) == false && this.kb.isValidPosition(x+i, y+j))
+                        legal &= this.kb.hasBreeze(x+i, y+j);
                 }
             }
         return legal;  
@@ -53,8 +53,8 @@ public class Env
             {
                 if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.isUnknown(x+i, y+j) == false && this.w.isValidPosition(x+i, y+j))
-                        legal &= this.w.hasStench(x+i, y+j);
+                    if(this.kb.isUnknown(x+i, y+j) == false && this.kb.isValidPosition(x+i, y+j))
+                        legal &= this.kb.hasStench(x+i, y+j);
                 }
             }
         return legal;
@@ -70,7 +70,7 @@ public class Env
             {
                 if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.hasBreeze(x+i, y+j))
+                    if(this.kb.hasBreeze(x+i, y+j))
                     {
                         int u = getNumUnknownNeighbours(x+i, y+i);
                         int n = getNumNeighboursWithPit(x+i, y+i);
@@ -88,21 +88,30 @@ public class Env
         if(isLegal(x, y, World.WUMPUS) == false) return false;
         
         int numNeighboursWithStench = 0;
+        List<Vector2> m = new ArrayList<Vector2>();
         for(int i = -1; i < 2; i++) {
             for(int j = -1; j < 2; j++)
             {
                 if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.hasStench(x+i, y+j))
+                    if(this.kb.hasStench(x+i, y+j))
                     {
                         numNeighboursWithStench++;
                         int u = getNumUnknownNeighbours(x+i, y+i);
                         if(u == 1) return true;
+                        
+                        for(Vector2 v : m)
+                        {
+                            if(Math.abs(v.x - (x+i)) == 2 || Math.abs(v.y - (y+j)) == 2) {
+                                return true;
+                            }
+                        }
+                        m.add(new Vector2(x+i, y+i));
                     }
                 }
             }
         }
-        return numNeighboursWithStench > 1;
+        return numNeighboursWithStench > 2;
     }
 
     private int getNumNeighboursWithPit(int x, int y)
@@ -113,8 +122,10 @@ public class Env
             {
                 if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.hasPit(x+i, y+j)) 
+                    if(this.kb.hasPit(x+i, y+j))
+                    {
                         n++;
+                    }
                 }
             }
         }
@@ -129,8 +140,10 @@ public class Env
             {
                 if(Math.abs(i) != Math.abs(j))
                 {
-                    if(this.w.isUnknown(x+i, y+j)) 
+                    if(this.kb.isUnknown(x+i, y+j)) 
+                    {
                         n++;
+                    }
                 }
             }
         }
