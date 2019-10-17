@@ -1,22 +1,43 @@
 package wumpusworld.Imp;
 
-import wumpusworld.Imp.Node;
+import wumpusworld.World;
+import wumpusworld.Imp.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class KnowledgeBase 
 {       
     public Cell[][] grid;
+    
+    private ModelBatch mb;
+    private Env env;
+    
+    private int knownPits;
+    private boolean wumpusFound;
     private List<Vector2> knownStenches; 
     private List<Vector2> knownBreezes; 
+    private List<Vector2> Frontier; 
     public int size;
 
-    public KnowledgeBase(int gridSize) 
+    public KnowledgeBase(World w) 
     {
-        this.size = gridSize;
-        this.grid = new Cell[gridSize][gridSize];
+        this.size = w.getSize();
+        this.grid = new Cell[this.size][this.size];
         this.knownStenches = new ArrayList<Vector2>();
         this.knownBreezes = new ArrayList<Vector2>();
+        this.Frontier = new ArrayList<Vector2>();
+        
+        // Player always start in (1, 1)
+        this.Frontier.add(new Vector2(1, 2));
+        this.Frontier.add(new Vector2(2, 1));
+        
+        this.knownPits = 0;
+        this.wumpusFound = false;
+        
+        
+        this.mb = new ModelBatch();
+        this.env = new Env();
+        this.env.setWorld(w);
 
         for (int x = 0; x < this.size; x++) {
                 for (int y = 0; y < this.size; y++) {
@@ -91,8 +112,8 @@ public class KnowledgeBase
     {
         for(int i = 0; i < this.size; i++) {
             for(int j = 0; j < this.size; j++) {
-                grid[i][j].wump = 0;
-                grid[i][j].probPit = 0.0f;
+                grid[i][j].probWump = 0.f;
+                grid[i][j].probPit = 0.f;
             }
         }
     }
@@ -113,10 +134,10 @@ public class KnowledgeBase
     }
     
     public void update() {
-         for (int x = 0; x < this.size; x++) {
-                for (int y = 0; y < this.size; y++) {
-                       handleFacts(grid[x][y]);
-                }
+         for (int x = 1; x <= this.size; x++) {
+            for (int y = 1; y <= this.size; y++) {
+                this.calcProbs(x, y);
+            }
         }   
     }
     
@@ -139,7 +160,58 @@ public class KnowledgeBase
         }
            
     }
-
+    
+    // Returns -1 if not found else return index in array
+    private int isFrontier(Vector2 pos) {
+        int index = 0;
+        for (Vector2 f : this.Frontier) {
+            if (f.equals(pos))
+                return index;
+            
+            index++;
+        }
+        return -1;
+    }
+    
+    public void updateFrontier(int newX, int newY) {
+        Cell newNode = this.grid[newX-1][newY-1];
+        int frontierIndex = isFrontier(newNode.pos);
+        if (frontierIndex != -1) {
+            // Remove node from frontier
+            this.Frontier.remove(frontierIndex);
+            Cell[] adjacent = this.getAdjacent(newNode.pos);
+            
+            for (Cell adj : adjacent) {
+                if (adj != null) {
+                    if (adj.unknown && isFrontier(adj.pos) == -1)
+                        this.Frontier.add(adj.pos);
+                }
+            }
+        }
+        System.out.println("Frontier: ");
+        for (Vector2 f : this.Frontier)
+            System.out.println("F: (" + f.x + ", " + f.y + ")");
+        System.out.println("##########");
+    }
+    
+    private void calcProbs(int x, int y) {
+        // Calculate pit prob
+        if (env.isLegal(x, y, "PIT")) {
+            
+        }
+        else {
+            this.grid[x-1][y-1].probPit = 0.f;
+        }
+        // Calculate wumpus prob
+        if (env.isLegal(x, y, "WUMPUS")) {
+            
+        }
+        else {
+            this.grid[x-1][y-1].probWump = 0.f;
+        }
+        
+    }
+    
     private void handleFacts(Cell c) {
         
         if (c.unknown == false) {
@@ -161,7 +233,6 @@ public class KnowledgeBase
                         c.probPit = 1.0f;
                         break;
                     case WUMPUS:
-                        c.wump = 3;
                         break;
                     default:
                         break;
@@ -172,7 +243,7 @@ public class KnowledgeBase
 
     private void handleStench(Fact f, Vector2 pos) {
         Cell[] adjacent = this.getAdjacent(pos);
-        
+        /*
         for (Cell adj : adjacent) {
             if (adj != null) {
                 if (!adj.safe) {
@@ -182,7 +253,7 @@ public class KnowledgeBase
                         adj.addFact(new Fact(Fact.Type.WUMPUS));
                }
             }
-        }
+        }*/
     }
     
     private void handleEmpty(Fact f, Vector2 pos) {

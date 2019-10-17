@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class Cell {
     public List<Fact> facts;
     public Vector2 pos;
-    public int wump;
+    public float probWump;
     public float probPit;
     public boolean unknown;
     public boolean safe;
@@ -22,7 +22,7 @@ public class Cell {
     public Cell(int x, int y) {
         this.facts = new ArrayList<Fact>();
         this.pos = new Vector2(x, y);
-        this.wump = 0;
+        this.probWump = 0.0f;
         this.probPit = 0.0f;
         this.unknown = true;
         this.safe = false;
@@ -37,7 +37,7 @@ public class Cell {
     
     public String toString()
     {
-        return "probPit: " + Float.toString(this.probPit) + ", wump: " + Integer.toString(this.wump) + ", Pos: " + this.pos.toString();
+        return "probPit: " + Float.toString(this.probPit) + ", wump: " + Float.toString(this.probWump) + ", Pos: " + this.pos.toString();
     }
     
 }

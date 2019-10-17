@@ -7,10 +7,8 @@ import wumpusworld.Imp.Env;
 import java.util.List;
 import java.util.ArrayList;
 
-import wumpusworld.Imp.AStar;
-import wumpusworld.Imp.Cell;
-import wumpusworld.Imp.Fact;
-import wumpusworld.Imp.Vector2;
+import wumpusworld.Imp.*;
+
 /**
  * Contains starting code for creating your own Wumpus World agent.
  * Currently the agent only make a random decision each turn.
@@ -21,7 +19,9 @@ public class MyAgent implements Agent
 {
     private World w;
     int rnd;
+    
     private KnowledgeBase kb;
+    
     private List<Node> currPath;
     private int currPathIndex;
     
@@ -33,7 +33,9 @@ public class MyAgent implements Agent
     public MyAgent(World world)
     {
         this.w = world;
-        this.kb = new KnowledgeBase(4);
+        
+        this.kb = new KnowledgeBase(this.w);
+        
         this.currPath = new ArrayList<Node>();
         this.currPathIndex = 0;
     }
@@ -111,7 +113,7 @@ public class MyAgent implements Agent
                 Cell c = kb.grid[i][j];
                 
                 w.probs[i][j][0] = c.probPit;
-                w.probs[i][j][1] = c.wump;
+                w.probs[i][j][1] = c.probWump;
             }
         }
         
@@ -123,7 +125,13 @@ public class MyAgent implements Agent
         }
         
         Node nextNode = this.currPath.get(this.currPathIndex);
+        
+        // Move to new block
         moveTo(getDirection(cX, cY, nextNode.index.x, nextNode.index.y));
+        
+        // Update frontier
+        this.kb.updateFrontier(nextNode.index.x, nextNode.index.y);
+        
         if(this.currPathIndex == (this.currPath.size()-1)) {
             this.currPath.clear();
         }
