@@ -5,10 +5,14 @@ import wumpusworld.Imp.Node;
 import wumpusworld.Imp.Env;
 
 import java.util.List;
+import java.util.Vector;
 import java.util.ArrayList;
 
 import wumpusworld.Imp.KnowledgeBase;
 import wumpusworld.World;
+
+import wumpusworld.Imp.BorderCell;
+import wumpusworld.Imp.Model;
 
 public class ModelBatch
 {
@@ -18,8 +22,8 @@ public class ModelBatch
     private Env env;
 
     
-    static final double probP = 3.0/15.0;
-    static final double probW = 1.0/15.0;
+    double probP = 3.0/15.0;
+    double probW = 1.0/15.0;
     
     public ModelBatch(KnowledgeBase kb)
     {
@@ -27,8 +31,11 @@ public class ModelBatch
         this.env = new Env();
     }
 
-    public double predict(int pitLeft, boolean wumpusLeft, int x, int y, String prediction)
+    public double predict(int pitLeft, boolean wumpusLeft, int numUnknowns, int x, int y, String prediction)
     {
+        this.probP = (double)pitLeft/numUnknowns;
+        this.probW = (wumpusLeft?1.0:0.0)/numUnknowns;
+
         List<Vector2> frontier = new ArrayList<Vector2>();
         for(Vector2 v : this.kb.Frontier)
         {
@@ -54,7 +61,8 @@ public class ModelBatch
             break;
         }
 
-        sumModelsProbPositive = getProbFromModels(pitLeft, wumpusLeft, frontier, x, y);
+        sumModelsProbPositive = getProbFromModels(kbCpy, pitLeft, wumpusLeft, frontier, x, y);
+        System.out.println("PrbPositive: " + Double.toString(sumModelsProbPositive));
         
         kbCpy = null;
         kbCpy = new KnowledgeBase(this.kb);
@@ -62,15 +70,16 @@ public class ModelBatch
         switch(prediction)
         {
             case World.PIT:
-                kbCpy.addPit(x, y);
+                kbCpy.removePit(x, y);
             break;
             case World.WUMPUS:
-                kbCpy.addWumpus(x, y);
+                kbCpy.removeWumpus(x, y);
             break;
         }
 
         // Calc combinations and probabilities when pit/wumpus is not present.
-        sumModelsProbNegative = getProbFromModels(pitLeft, wumpusLeft, frontier, x, y);
+        sumModelsProbNegative = getProbFromModels(kbCpy, pitLeft, wumpusLeft, frontier, x, y);
+        System.out.println("PrbNegative: " + Double.toString(sumModelsProbNegative));
 
         // Calculate probability.
         double prob = 0.0;
@@ -86,9 +95,71 @@ public class ModelBatch
         return probPositive/sum;
     }
 
-    private double getProbFromModels(int pitLeft, boolean wumpusLeft, List<Vector2> frontier, int x, int y)
+    private double getProbFromModels(KnowledgeBase kb, int pitLeft, boolean wumpusLeft, List<Vector2> frontier, int x, int y)
     {
-        double probResult = 0.0;
+        double probability = 0.0;
+        // Generate all possible models and compute its total probability.
+        int n = frontier.size();
+
+        int totCominationsPits = (int)Math.pow(2.0, n); // Includes one with 0 pits and all pits.
+        List<BorderCell[]> combinationsPits = new ArrayList<BorderCell[]>();
+        for(int i = 0; i < totCominationsPits; i++) {
+            BorderCell[] border = new BorderCell[n];
+            for(int j = 0; j < n; j++)
+            {
+                boolean active = (i & (1 << j)) == 0 ? false : true;
+                Vector2 f = frontier.get(j); 
+                border[j] = new BorderCell(f, active);
+            }
+            combinationsPits.add(border);
+        }
+
+        int totCominationsWumpus = n+1; // Includes one with 0 wumpus.
+        List<BorderCell[]> combinationsWump = new ArrayList<BorderCell[]>();
+        for(int i = 0; i < totCominationsWumpus; i++) {
+            BorderCell[] border = new BorderCell[n];
+            for(int j = 0; j < n; j++)
+            {
+                boolean active = i==j;
+                Vector2 f = frontier.get(j); 
+                border[j] = new BorderCell(f, active);
+            }
+            combinationsWump.add(border);
+        }
+
+        System.out.println("Num combs, Pit: " + Integer.toString(totCominationsPits) + ", Wump: " + Integer.toString(totCominationsWumpus));
+        for(BorderCell[] borderPits : combinationsPits)
+        {
+            for(BorderCell[] borderWump : combinationsWump)
+            {
+                Model model = new Model(kb);
+                for(BorderCell cell : borderPits) {
+                    if(cell.active)
+                    model.addType(cell.v.x, cell.v.y, World.PIT);
+                    else
+                    model.addEmpty(cell.v.x, cell.v.y);
+                }
+                for(BorderCell cell : borderWump) {
+                    if(cell.active)
+                        model.addType(cell.v.x, cell.v.y, World.WUMPUS);
+                    else
+                        model.addEmpty(cell.v.x, cell.v.y);
+                }
+
+    
+                if(model.isLegal())
+                {
+                    model.print();
+                    double prob = model.getProbability();
+                    System.out.println("Model: " + Double.toString(prob));
+                    probability += prob;
+                }
+            }
+        }
+
+        return probability;
+
+        /*double probResult = 0.0;
 
         // Calc combinations and probabilities when pit/wumpus is present.
         int n = frontier.size();
@@ -98,6 +169,7 @@ public class ModelBatch
         int nMustBePitPos = 0;
         int nMustBeWumpPos = 0; // Can only be 1 or 0.
         // Get number of places which a wumpus and a pit can be.
+        System.out.println("FrontierSize: " + Integer.toString(n));
         for(Vector2 f : frontier)
         {
             if(this.env.isLegal(f.x, f.y, World.PIT)) {
@@ -111,6 +183,20 @@ public class ModelBatch
                     nMustBeWumpPos++;
             }
         }
+
+        // Wumpus combinations.
+        if(nMustBeWumpPos > 0)
+            nLegalWumpPos = nMustBeWumpPos;
+        int wumpusComb = binomial(nLegalWumpPos, 1);
+        System.out.println("WumpCombo: " + Integer.toString(wumpusComb) + ", nLegalWumpPos: " + Integer.toString(nLegalWumpPos) + ", nMustBeWumpPos: " + Integer.toString(nMustBeWumpPos));
+        for(int i = 0; i < wumpusComb; i++)
+        {
+            double modelProbWumpus = Math.pow(probW, 1)*Math.pow(1.0-probW, wumpusComb-1);
+            probResult += modelProbWumpus;
+        }
+        return probResult;
+        */
+        /*
         int nPits = nLegalPitPos > pitLeft ? pitLeft : nLegalPitPos;
         // Go through each number of pits which can be present and calculate number of combinations (models) for that number of pits.
         // Also calculate number of combinations for wumpus.
@@ -141,8 +227,8 @@ public class ModelBatch
                 probResult += modelProbPit*modelProbWump;
             }
         }
-
-        return probResult;
+        
+        return probResult;*/
     }
 
     private int binomial(int n, int k)

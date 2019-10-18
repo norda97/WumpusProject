@@ -137,6 +137,7 @@ public class KnowledgeBase
         if (!hasPit(x, y)) {
             Cell c = grid[x-1][y-1];
             c.addFact(new Fact(Fact.Type.PIT));
+            removeFact(x, y, Fact.Type.UNKNOWN);
             c.unknown = false;
             return true;
         }
@@ -144,15 +145,8 @@ public class KnowledgeBase
     }
     
     public boolean removePit(int x, int y) {
-        Cell c = grid[x-1][y-1];
-        for (int i = 0; i < c.facts.size(); i++) {
-            Fact f = c.facts.get(i);
-            if (f.type == Fact.Type.PIT) {
-                c.facts.remove(i);
-                c.unknown = false;
-                return true;
-            }
-        }
+        removeFact(x, y, Fact.Type.PIT);
+        removeFact(x, y, Fact.Type.UNKNOWN);
         return false;
     }
     
@@ -160,20 +154,15 @@ public class KnowledgeBase
          if (!hasWumpus(x, y)) {
             Cell c = grid[x-1][y-1];
             c.addFact(new Fact(Fact.Type.WUMPUS));
+            removeFact(x, y, Fact.Type.UNKNOWN);
             return true;
         }
         return false;
     }
     
     public boolean removeWumpus(int x, int y) {
-        Cell c = grid[x-1][y-1];
-        for (int i = 0; i < c.facts.size(); i++) {
-            Fact f = c.facts.get(i);
-            if (f.type == Fact.Type.WUMPUS) {
-                c.facts.remove(i);
-                return true;
-            }
-        }
+        removeFact(x, y, Fact.Type.WUMPUS);
+        removeFact(x, y, Fact.Type.UNKNOWN);
         return false;
     }
     
@@ -219,7 +208,8 @@ public class KnowledgeBase
 
                 }
                 else {
-                    if (adj.probPit < grid[bb.x-1][bb.y-1].probPit || !grid[bb.x-1][bb.y-1].unknown) {
+                    if (Math.max(adj.probPit, adj.probWump) < Math.max(grid[bb.x-1][bb.y-1].probPit, grid[bb.x-1][bb.y-1].probWump) 
+                        || !grid[bb.x-1][bb.y-1].unknown) {
                         bb.x = adj.pos.x;
                         bb.y = adj.pos.y;
                         currNode.addNeighbour(new Node(adj.pos.x, adj.pos.y));
@@ -227,6 +217,7 @@ public class KnowledgeBase
                 }
             }
         }
+        /*
         System.out.println("Added (" + currNode.index.x +
                                 ", " + currNode.index.y + ")");
         
@@ -235,7 +226,7 @@ public class KnowledgeBase
             System.out.println("    Neigh(" + n.index.x +
                                 ", " + n.index.y + ")");
         }
-        
+        */
         return currNode;
     }
     
@@ -272,8 +263,19 @@ public class KnowledgeBase
         }   
     }
     
+    public void removeFact(int x, int y, Fact.Type type) {
+        Cell c = grid[x-1][y-1];
+        for (int i = 0; i < c.facts.size(); i++) {
+            Fact f = c.facts.get(i);
+            if (f.type == type) {
+                c.facts.remove(i);
+            }
+        }
+    } 
+
     // Only adds fact if it isn't already added
     public void addType(Vector2 pos, Fact.Type foundType) {
+        if(foundType != Fact.Type.UNKNOWN) removeFact(pos.x, pos.y, Fact.Type.UNKNOWN);
         boolean alreadyAdded = false;
         Cell c = grid[pos.x-1][pos.y-1];
         for (int i = 0; i < c.facts.size(); i++) {
@@ -319,10 +321,6 @@ public class KnowledgeBase
                 }
             }
         }
-        System.out.println("Frontier: ");
-        for (Vector2 f : this.Frontier)
-            System.out.println("F: (" + f.x + ", " + f.y + ")");
-        System.out.println("##########");
     }
     
     private void calcProbs(int x, int y) {

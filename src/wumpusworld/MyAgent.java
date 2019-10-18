@@ -113,15 +113,21 @@ public class MyAgent implements Agent
         // Update GUI numbers
         for(Vector2 v : this.kb.Frontier) {
             Cell c = kb.grid[v.x-1][v.y-1];
-            
-            c.probPit = (float)this.mb.predict(3-kb.knownPits, true, v.x, v.y, World.PIT);
-            c.probWump = (float)this.mb.predict(3-kb.knownPits, true, v.x, v.y, World.WUMPUS);
-
-            System.out.println("ProbPit: " + Float.toString(c.probPit) + ", ProbWump: " + Float.toString(c.probWump));
+            int numUnknowns = 15;
+            c.probPit = //(float)this.mb.predict(3-kb.knownPits, true, numUnknowns, v.x, v.y, World.PIT);
+            c.probWump = (float)this.mb.predict(3-kb.knownPits, true, numUnknowns, v.x, v.y, World.WUMPUS);
 
             w.probs[v.x-1][v.y-1][0] = c.probPit;
             w.probs[v.x-1][v.y-1][1] = c.probWump;
         }
+
+        System.out.println("Frontier: ");
+        for (Vector2 f : this.kb.Frontier)
+        {
+            Cell c = kb.grid[f.x-1][f.y-1];
+            System.out.println("F: " + f.toString() + ", ProbPit: " + Float.toString(c.probPit) + ", ProbWump: " + Float.toString(c.probWump));
+        }
+        System.out.println("##########");
         
         if (currPath.isEmpty()) {
             Node[] startGoal = kb.calcPathData(cX, cY);        

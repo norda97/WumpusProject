@@ -5,6 +5,9 @@
  */
 package wumpusworld.Imp;
 import java.util.List;
+
+import wumpusworld.Imp.Fact.Type;
+
 import java.util.ArrayList;
 
 /**
@@ -21,6 +24,7 @@ public class Cell {
     
     public Cell(int x, int y) {
         this.facts = new ArrayList<Fact>();
+        this.facts.add(new Fact(Type.UNKNOWN));
         this.pos = new Vector2(x, y);
         this.probWump = 0.0f;
         this.probPit = 0.0f;
