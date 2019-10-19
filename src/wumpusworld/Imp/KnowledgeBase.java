@@ -165,18 +165,46 @@ public class KnowledgeBase
         removeFact(x, y, Fact.Type.UNKNOWN);
         return false;
     }
+
+    public int getNumUnknowns() {
+        int n = 0;
+        for(int x = 0; x < 4; x++) {
+            for(int y = 0; y < 4; y++) {
+                if(hasFact(x+1, y+1, Fact.Type.UNKNOWN))
+                    n++;
+            }   
+        }
+        return n;
+    }
     
+    public boolean shouldTryShootingWumpus = false;
+    public boolean hasArrow = true;
+    public Vector2 wumpusPos;
+
     public Node[] calcPathData(int x, int y) {
         Node[][] nodes = new Node[4][4];
 
         final int n = Frontier.size();
         Vector2 bestBet = Frontier.get(0);
+        Vector2 bestWump = bestBet;
         for(int i = 1; i < n; i++) {
             Vector2 f = Frontier.get(i);
-            Cell b = this.grid[bestBet.x-1][bestBet.y-1];
+            Cell best = this.grid[bestBet.x-1][bestBet.y-1];
+            Cell bestW = this.grid[bestWump.x-1][bestWump.y-1];
             Cell other = this.grid[f.x-1][f.y-1];
-            if(Math.max(b.probPit, b.probWump) > Math.max(other.probPit, other.probWump))
+            if(bestW.probWump < other.probWump) bestWump = other.pos;
+            if(Math.max(best.probPit, best.probWump) > Math.max(other.probPit, other.probWump))
                 bestBet = other.pos;
+        }
+
+        Cell best = this.grid[bestBet.x-1][bestBet.y-1];
+        double prob = Math.max(best.probPit, best.probWump);
+        if(prob > 0.000001 && this.grid[bestWump.x-1][bestWump.y-1].probWump > 0.00001) {
+            // Try to shoot wumpus!
+            if(hasArrow) {
+                this.shouldTryShootingWumpus = true;
+                this.wumpusPos = new Vector2(bestWump.x, bestWump.y);
+            }
         }
 
         for(int i = 0; i < 4; i++) {
@@ -206,6 +234,33 @@ public class KnowledgeBase
             }
         }
 
+        // Try to find a position close to wumpus.
+        if(this.shouldTryShootingWumpus) {
+            List<Node> neighbours = new ArrayList<Node>();
+            Node wn = nodes[wumpusPos.x-1][wumpusPos.y-1];
+            if(wn != null)
+                neighbours = wn.neighbours;
+            else {
+                int i = wumpusPos.x-1;
+                int j = wumpusPos.y-1;
+                if (isValidPosition(i+1, j+2))
+                    if(nodes[i][j+1] != null) // Up
+                        neighbours.add(nodes[i][j+1]);
+                if (isValidPosition(i+2, j+1))
+                    if(nodes[i+1][j] != null) // Right
+                        neighbours.add(nodes[i+1][j]);
+                if (isValidPosition(i+1, j))
+                    if(nodes[i][j-1] != null) // Down
+                        neighbours.add(nodes[i][j-1]);
+                if (isValidPosition(i, j+1))
+                    if(nodes[i-1][j] != null) // Left
+                        neighbours.add(nodes[i-1][j]);
+            }
+            // TODO: Should pick the closest position from current.
+            bestBet = neighbours.get(0).index;
+            System.out.println("Should shoot wumpus from position " + bestBet.toString() + " towards position " + wumpusPos.toString());
+        }
+
         Node[] result = new Node[2];
         result[1] = nodes[x-1][y-1];
         result[0] = nodes[bestBet.x-1][bestBet.y-1];
@@ -225,7 +280,7 @@ public class KnowledgeBase
         */
         return result;
     }
-    
+
     private Node getSafeNeighbours(Cell c, List<Node> visited, Vector2 bb) {
         
         Cell[] adjacent = getAdjacent(new Vector2(c.pos.x, c.pos.y));

@@ -60,11 +60,8 @@ public class Model
         }
     }
 
-    public double getProbability()
+    public double getProbability(double probP, double probW)
     {
-        final double probP = 3.0/15.0;
-        final double probW = 1.0/15.0;
-
         double probability = 1.0;
         for(Vector2 v : this.frontier) {
             if(is(v.x, v.y, World.PIT))
