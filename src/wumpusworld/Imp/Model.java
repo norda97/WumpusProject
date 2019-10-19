@@ -98,18 +98,34 @@ public class Model
     public boolean isLegal()
     {
         convertFrontier();
+        //print();
         
         boolean legal = true;
         for(int x = 0; x < 4; x++) {
             for(int y = 0; y < 4; y++) {
-                if(is(x+1, y+1, World.PIT)) {
-                    legal = isCellLegalAND(x+1, y+1, World.PIT);
-                    if(legal == false) return false;
+                if(is(x+1, y+1, World.STENCH)) {
+                    legal = isCellLegalOR(x+1, y+1, World.WUMPUS);
+                    if(legal == false) {
+                        return false;
+                    }
                 }
-
+                if(is(x+1, y+1, World.BREEZE)) {
+                    legal = isCellLegalOR(x+1, y+1, World.PIT);
+                    if(legal == false) {
+                        return false;
+                    }
+                }
+                if(is(x+1, y+1, World.PIT)) {
+                    legal = isCellLegalAND(x+1, y+1, World.BREEZE);
+                    if(legal == false)  {
+                        return false;
+                    }
+                }
                 if(is(x+1, y+1, World.WUMPUS)) {
-                    legal = isCellLegalAND(x+1, y+1, World.WUMPUS);
-                    if(legal == false) return false;
+                    legal = isCellLegalAND(x+1, y+1, World.STENCH);
+                    if(legal == false)  {
+                        return false;
+                    }
                 }
             }   
         }

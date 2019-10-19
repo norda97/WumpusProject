@@ -166,8 +166,53 @@ public class KnowledgeBase
         return false;
     }
     
-    public Node[] calcPathData(int cx, int cy) {
+    public Node[] calcPathData(int x, int y) {
+        Node[][] nodes = new Node[4][4];
+
+        final int n = Frontier.size();
+        Vector2 bestBet = Frontier.get(0);
+        for(int i = 1; i < n; i++) {
+            Vector2 f = Frontier.get(i);
+            Cell b = this.grid[bestBet.x-1][bestBet.y-1];
+            Cell other = this.grid[f.x-1][f.y-1];
+            if(Math.max(b.probPit, b.probWump) > Math.max(other.probPit, other.probWump))
+                bestBet = other.pos;
+        }
+
+        for(int i = 0; i < 4; i++) {
+            for(int j = 0; j < 4; j++) {
+                if(!hasFact(i+1, j+1, Fact.Type.UNKNOWN) || (i == bestBet.x-1 && j == bestBet.y-1))
+                    nodes[i][j] = new Node(i+1, j+1);
+            }
+        }
+
+        // Add neighbours
+        for(int i = 0; i < 4; i++) {
+            for(int j = 0; j < 4; j++) {
+                if(!hasFact(i+1, j+1, Fact.Type.UNKNOWN) || (i == bestBet.x-1 && j == bestBet.y-1)) {
+                    if (isValidPosition(i+1, j+2))
+                        if(nodes[i][j+1] != null) // Up
+                            nodes[i][j].neighbours.add(nodes[i][j+1]);
+                    if (isValidPosition(i+2, j+1))
+                        if(nodes[i+1][j] != null) // Right
+                            nodes[i][j].neighbours.add(nodes[i+1][j]);
+                    if (isValidPosition(i+1, j))
+                        if(nodes[i][j-1] != null) // Down
+                            nodes[i][j].neighbours.add(nodes[i][j-1]);
+                    if (isValidPosition(i, j+1))
+                        if(nodes[i-1][j] != null) // Left
+                            nodes[i][j].neighbours.add(nodes[i-1][j]);
+                }
+            }
+        }
+
+        Node[] result = new Node[2];
+        result[1] = nodes[x-1][y-1];
+        result[0] = nodes[bestBet.x-1][bestBet.y-1];
         
+        System.out.println("Best bet: (" + bestBet.x + ","+ bestBet.y + ")");
+        System.out.println("###########################\n");
+        /*
         Cell start = grid[cx-1][cy-1];
         List<Node> visited = new ArrayList<Node>();
         Vector2 bestBet = new Vector2(start.pos.x, start.pos.y);
@@ -177,6 +222,7 @@ public class KnowledgeBase
         
         System.out.println("Best bet: (" + bestBet.x + ","+ bestBet.y + ")");
         System.out.println("###########################\n");
+        */
         return result;
     }
     
@@ -208,8 +254,7 @@ public class KnowledgeBase
 
                 }
                 else {
-                    if (Math.max(adj.probPit, adj.probWump) < Math.max(grid[bb.x-1][bb.y-1].probPit, grid[bb.x-1][bb.y-1].probWump) 
-                        || !grid[bb.x-1][bb.y-1].unknown) {
+                    if (Math.max(adj.probPit, adj.probWump) < Math.max(grid[bb.x-1][bb.y-1].probPit, grid[bb.x-1][bb.y-1].probWump) && !grid[bb.x-1][bb.y-1].unknown) {
                         bb.x = adj.pos.x;
                         bb.y = adj.pos.y;
                         currNode.addNeighbour(new Node(adj.pos.x, adj.pos.y));
@@ -272,6 +317,17 @@ public class KnowledgeBase
             }
         }
     } 
+
+    public boolean hasFact(int x, int y, Fact.Type type) {
+        Cell c = this.grid[x-1][y-1];
+        for (int i = 0; i < c.facts.size(); i++) {
+            Fact f = c.facts.get(i);
+            if (f.type == type) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // Only adds fact if it isn't already added
     public void addType(Vector2 pos, Fact.Type foundType) {

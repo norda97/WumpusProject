@@ -33,6 +33,7 @@ public class ModelBatch
 
     public double predict(int pitLeft, boolean wumpusLeft, int numUnknowns, int x, int y, String prediction)
     {
+        System.out.println("Predict [" + prediction + "] at (" + Integer.toString(x) + ", " + Integer.toString(y) + ")");
         this.probP = (double)pitLeft/numUnknowns;
         this.probW = (wumpusLeft?1.0:0.0)/numUnknowns;
 
@@ -50,36 +51,26 @@ public class ModelBatch
         double sumModelsProbPositive = 0.0;
         double sumModelsProbNegative = 0.0;
 
-        // Calc combinations and probabilities when pit/wumpus is not present.
-        switch(prediction)
-        {
-            case World.PIT:
-                kbCpy.addPit(x, y);
-            break;
-            case World.WUMPUS:
-                kbCpy.addWumpus(x, y);
-            break;
-        }
+        if(prediction.contains(World.PIT))
+            kbCpy.addPit(x, y);
+        if(prediction.contains(World.WUMPUS))
+            kbCpy.addWumpus(x, y);
 
         sumModelsProbPositive = getProbFromModels(kbCpy, pitLeft, wumpusLeft, frontier, x, y);
-        System.out.println("PrbPositive: " + Double.toString(sumModelsProbPositive));
+        System.out.println("--->Positive: " + Double.toString(sumModelsProbPositive));
         
         kbCpy = null;
         kbCpy = new KnowledgeBase(this.kb);
         this.env.setKB(kbCpy);
-        switch(prediction)
-        {
-            case World.PIT:
-                kbCpy.removePit(x, y);
-            break;
-            case World.WUMPUS:
-                kbCpy.removeWumpus(x, y);
-            break;
-        }
+        
+        if(prediction.contains(World.PIT))
+            kbCpy.removePit(x, y);
+        if(prediction.contains(World.WUMPUS))
+            kbCpy.removeWumpus(x, y);
 
         // Calc combinations and probabilities when pit/wumpus is not present.
         sumModelsProbNegative = getProbFromModels(kbCpy, pitLeft, wumpusLeft, frontier, x, y);
-        System.out.println("PrbNegative: " + Double.toString(sumModelsProbNegative));
+        System.out.println("--->Negative: " + Double.toString(sumModelsProbNegative));
 
         // Calculate probability.
         double prob = 0.0;
@@ -91,8 +82,11 @@ public class ModelBatch
         double probPositive = sumModelsProbPositive * prob;
         double probNegative = sumModelsProbNegative * (1.0 - prob);
         double sum = probPositive+probNegative;
+        double finalProb = 0.0;
+        if(sum > 0.00000001) finalProb = probPositive/sum;
 
-        return probPositive/sum;
+        System.out.println("--->[Normalized] Prob positive: " + Double.toString(finalProb));
+        return finalProb;
     }
 
     private double getProbFromModels(KnowledgeBase kb, int pitLeft, boolean wumpusLeft, List<Vector2> frontier, int x, int y)
@@ -127,12 +121,14 @@ public class ModelBatch
             combinationsWump.add(border);
         }
 
-        System.out.println("Num combs, Pit: " + Integer.toString(totCominationsPits) + ", Wump: " + Integer.toString(totCominationsWumpus));
+        //System.out.println("Num combs, Pit: " + Integer.toString(totCominationsPits) + ", Wump: " + Integer.toString(totCominationsWumpus));
         for(BorderCell[] borderPits : combinationsPits)
         {
             for(BorderCell[] borderWump : combinationsWump)
             {
+                //System.out.println("\n================== New Model ==================");
                 Model model = new Model(kb);
+                model.addEmpty(x, y);
                 for(BorderCell cell : borderPits) {
                     if(cell.active)
                     model.addType(cell.v.x, cell.v.y, World.PIT);
@@ -149,9 +145,8 @@ public class ModelBatch
     
                 if(model.isLegal())
                 {
-                    model.print();
                     double prob = model.getProbability();
-                    System.out.println("Model: " + Double.toString(prob));
+                    //System.out.println("[PICKED] Model with prob: " + Double.toString(prob));
                     probability += prob;
                 }
             }

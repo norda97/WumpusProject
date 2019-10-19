@@ -114,9 +114,17 @@ public class MyAgent implements Agent
         for(Vector2 v : this.kb.Frontier) {
             Cell c = kb.grid[v.x-1][v.y-1];
             int numUnknowns = 15;
-            c.probPit = //(float)this.mb.predict(3-kb.knownPits, true, numUnknowns, v.x, v.y, World.PIT);
+            float probPitAndWump = (float)this.mb.predict(3-kb.knownPits, true, numUnknowns, v.x, v.y, World.PIT + World.WUMPUS);
+            System.out.println("P(P AND W): " + Double.toString(probPitAndWump));
+            
+            c.probPit = (float)this.mb.predict(3-kb.knownPits, true, numUnknowns, v.x, v.y, World.PIT);
             c.probWump = (float)this.mb.predict(3-kb.knownPits, true, numUnknowns, v.x, v.y, World.WUMPUS);
-
+            
+            if(probPitAndWump > c.probPit && probPitAndWump > c.probWump) {
+                c.probPit = probPitAndWump;
+                c.probWump = probPitAndWump;
+            }
+            
             w.probs[v.x-1][v.y-1][0] = c.probPit;
             w.probs[v.x-1][v.y-1][1] = c.probWump;
         }
@@ -131,9 +139,17 @@ public class MyAgent implements Agent
         
         if (currPath.isEmpty()) {
             Node[] startGoal = kb.calcPathData(cX, cY);        
-            AStar.make(startGoal[0], startGoal[1], this.currPath);
+            AStar.make(startGoal[1], startGoal[0], this.currPath);
             this.currPathIndex = 1;
         }
+
+        System.out.println("Curren path");
+        for(int i = 0; i < this.currPath.size(); i++) {
+            boolean isCP = this.currPathIndex == i;
+            Node n = this.currPath.get(i);
+            System.out.print("-> " + (isCP?"[":"") + n.index.toString() + (isCP?"] ":" "));
+        }
+        System.out.print("\n");
         
         Node nextNode = this.currPath.get(this.currPathIndex);
         
@@ -148,39 +164,12 @@ public class MyAgent implements Agent
         }
         this.currPathIndex++;
 
-        
-        /*
-        List<Integer> good Moves = new ArrayList();
-        for(int i = 0; i < 4; i++)
-        {
-            Cell c = neighbours[i];
-            if(c != null)
-            {
-                if(c.safe)
-                {
-                    goodMoves.add(i);
-                }
-                else if (c.wump == 1 && (c.probPit > 0.0f && c.probPit <= 0.75f)) {
-                    goodMoves.add(i);
-                }
-            }
-        }        
-       
-        // Move to desired direction.
-        int s = goodMoves.size();
-        if (s > 0) {
-            int d = goodMoves.get(decideRandomMove(s));
-            moveTo(d);
-        }
-        */
         kb.reset();
     }
     
     private int getDirection(int cX, int cY, int nX, int nY) {
-        Node nextNode = this.currPath.get(this.currPathIndex);
-            
-        int x = nextNode.index.x - cX;
-        int y = nextNode.index.y - cY;
+        int x = nX - cX;
+        int y = nY - cY;
 
         if (x != 0) {
             if (x > 0)
