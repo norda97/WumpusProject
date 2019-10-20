@@ -1,7 +1,8 @@
 package wumpusworld.Imp;
 
 import wumpusworld.World;
-import wumpusworld.Imp.*;
+import wumpusworld.Imp.Vector2;
+import wumpusworld.Imp.Cell;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +14,12 @@ public class KnowledgeBase
     public boolean wumpusFound;
     //private List<Vector2> knownStenches; 
     //private List<Vector2> knownBreezes; 
-    public List<Vector2> Frontier; 
+    public List<Vector2> frontier; 
     public int size;
+    
+    public boolean shouldTryShootingWumpus = false;
+    public boolean hasArrow = true;
+    public Vector2 wumpusPos;
 
     public KnowledgeBase(World w) 
     {
@@ -22,11 +27,11 @@ public class KnowledgeBase
         this.grid = new Cell[this.size][this.size];
         //this.knownStenches = new ArrayList<Vector2>();
         //this.knownBreezes = new ArrayList<Vector2>();
-        this.Frontier = new ArrayList<Vector2>();
+        this.frontier = new ArrayList<Vector2>();
         
         // Player always start in (1, 1)
-        this.Frontier.add(new Vector2(1, 2));
-        this.Frontier.add(new Vector2(2, 1));
+        this.frontier.add(new Vector2(1, 2));
+        this.frontier.add(new Vector2(2, 1));
         
         this.knownPits = 0;
         //this.wumpusFound = false;
@@ -45,7 +50,7 @@ public class KnowledgeBase
 
         //this.knownStenches = new ArrayList<Vector2>();
         //this.knownBreezes = new ArrayList<Vector2>();
-        this.Frontier = new ArrayList<Vector2>();
+        this.frontier = new ArrayList<Vector2>();
         
         //for (Vector2 c : other.knownStenches)
         //    this.knownStenches.add(new Vector2(c.x, c.y));
@@ -53,8 +58,8 @@ public class KnowledgeBase
         //for (Vector2 c : other.knownBreezes)
         //    this.knownBreezes.add(new Vector2(c.x, c.y));
         
-        for (Vector2 c : other.Frontier)
-            this.Frontier.add(new Vector2(c.x, c.y));
+        for (Vector2 c : other.frontier)
+            this.frontier.add(new Vector2(c.x, c.y));
         
         this.grid = new Cell[this.size][this.size];
         
@@ -131,7 +136,6 @@ public class KnowledgeBase
             Cell c = grid[x-1][y-1];
             c.addFact(new Fact(Fact.Type.PIT));
             removeFact(x, y, Fact.Type.UNKNOWN);
-            //c.unknown = false;
             return true;
         }
         return false;
@@ -169,27 +173,28 @@ public class KnowledgeBase
         }
         return n;
     }
-    
-    public boolean shouldTryShootingWumpus = false;
-    public boolean hasArrow = true;
-    public Vector2 wumpusPos;
 
     public Node[] calcPathData(int x, int y) {
         Node[][] nodes = new Node[4][4];
 
-        final int n = Frontier.size();
-        Vector2 bestBet = Frontier.get(0);
+        // Get best position (one with the smallest probabilities of wumpus and pit).
+        // And the cell with the highest probability of a wumpus.
+        final int n = this.frontier.size();
+        Vector2 bestBet = this.frontier.get(0);
         Vector2 bestWump = bestBet;
         for(int i = 1; i < n; i++) {
-            Vector2 f = Frontier.get(i);
+            Vector2 f = this.frontier.get(i);
             Cell best = this.grid[bestBet.x-1][bestBet.y-1];
             Cell bestW = this.grid[bestWump.x-1][bestWump.y-1];
             Cell other = this.grid[f.x-1][f.y-1];
+            // Pick the cell with the highest probability of a wumpus.
             if(bestW.probWump < other.probWump) bestWump = other.pos;
+            // Compare the highest probability of the two cells, and pick the one with the lowest probability.
             if(Math.max(best.probPit, best.probWump) > Math.max(other.probPit, other.probWump))
                 bestBet = other.pos;
         }
 
+        // If uncertain and a wumpus is likely to be on a cell, then try to shoot it.
         Cell best = this.grid[bestBet.x-1][bestBet.y-1];
         double prob = Math.max(best.probPit, best.probWump);
         if(prob > 0.000001 && this.grid[bestWump.x-1][bestWump.y-1].probWump > 0.00001) {
@@ -200,6 +205,7 @@ public class KnowledgeBase
             }
         }
 
+        // Add all known cells and the target cell. 
         for(int i = 0; i < 4; i++) {
             for(int j = 0; j < 4; j++) {
                 if(!hasFact(i+1, j+1, Fact.Type.UNKNOWN) || (i == bestBet.x-1 && j == bestBet.y-1))
@@ -207,10 +213,11 @@ public class KnowledgeBase
             }
         }
 
-        // Add neighbours
+        // Add neighbours to each cell which will be in the search graph.
         for(int i = 0; i < 4; i++) {
             for(int j = 0; j < 4; j++) {
                 if(!hasFact(i+1, j+1, Fact.Type.UNKNOWN) || (i == bestBet.x-1 && j == bestBet.y-1)) {
+                    // Only add cells which is in a neighbouring position, is valid and is in the search graph. 
                     if (isValidPosition(i+1, j+2))
                         if(nodes[i][j+1] != null) // Up
                             nodes[i][j].neighbours.add(nodes[i][j+1]);
@@ -231,9 +238,11 @@ public class KnowledgeBase
         if(this.shouldTryShootingWumpus) {
             List<Node> neighbours = new ArrayList<Node>();
             Node wn = nodes[wumpusPos.x-1][wumpusPos.y-1];
+            // If wumpus is in the search graph, fetch its neighbours.
             if(wn != null)
                 neighbours = wn.neighbours;
             else {
+                // If it was not in the search graph, fetch each neighbour one by one if they exist.
                 int i = wumpusPos.x-1;
                 int j = wumpusPos.y-1;
                 if (isValidPosition(i+1, j+2))
@@ -254,6 +263,7 @@ public class KnowledgeBase
             System.out.println("Should shoot wumpus from position " + bestBet.toString() + " towards position " + wumpusPos.toString());
         }
 
+        // Add the starting node and the target to the path.
         Node[] result = new Node[2];
         result[1] = nodes[x-1][y-1];
         result[0] = nodes[bestBet.x-1][bestBet.y-1];
@@ -401,7 +411,7 @@ public class KnowledgeBase
     // Returns -1 if not found else return index in array
     private int isFrontier(Vector2 pos) {
         int index = 0;
-        for (Vector2 f : this.Frontier) {
+        for (Vector2 f : this.frontier) {
             if (f.equals(pos))
                 return index;
             
@@ -415,13 +425,13 @@ public class KnowledgeBase
         int frontierIndex = isFrontier(newNode.pos);
         if (frontierIndex != -1) {
             // Remove node from frontier
-            this.Frontier.remove(frontierIndex);
+            this.frontier.remove(frontierIndex);
             Cell[] adjacent = this.getAdjacent(newNode.pos);
             
             for (Cell adj : adjacent) {
                 if (adj != null) {
                     if (isFrontier(adj.pos) == -1 && hasFact(adj.pos.x, adj.pos.y, Fact.Type.UNKNOWN))
-                        this.Frontier.add(adj.pos);
+                        this.frontier.add(adj.pos);
                 }
             }
         }

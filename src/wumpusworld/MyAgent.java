@@ -123,28 +123,35 @@ public class MyAgent implements Agent
         
         // Update GUI numbers
         boolean wumpusFound = false;
-        for(Vector2 v : this.kb.Frontier) {
+        for(Vector2 v : this.kb.frontier) {
             Cell c = kb.grid[v.x-1][v.y-1];
             int numUnknowns = kb.getNumUnknowns();
-            //System.out.println("P(P AND W): " + Double.toString(probPitAndWump));
             
+            // Get the probability of it being a wumpus at the cell.
             c.probWump = (float)this.mb.predict(3-kb.knownPits, !wumpusFound, numUnknowns, v.x, v.y, World.WUMPUS);
+            // If certain it is a wumpus, tell the rest of the cells that the wumpus was found.
             if(c.probWump > 0.99999f) wumpusFound = true;
             
+            // Get the probability of it being a pit at the cell. 
             c.probPit = (float)this.mb.predict(3-kb.knownPits, !wumpusFound, numUnknowns, v.x, v.y, World.PIT);
+
+            // Get the probability of it being both a pit and a wumpus at the cell.
             float probPitAndWump = (float)this.mb.predict(3-kb.knownPits, !wumpusFound, numUnknowns, v.x, v.y, World.PIT + World.WUMPUS);
+            
+            // If it is more likly to be both than one => set it to the new probability.
             if(probPitAndWump > c.probPit && probPitAndWump > c.probWump) {
                 c.probPit = probPitAndWump;
                 c.probWump = probPitAndWump;
             }
             
+            // Update GUI
             w.probs[v.x-1][v.y-1][0] = c.probPit;
             w.probs[v.x-1][v.y-1][1] = c.probWump;
         }
 
         // Set all probabilities (except the one with a probability of 1.0) for wumpus to 0.0 if wumpus was found.
         if(wumpusFound) {
-            for(Vector2 v : this.kb.Frontier) {
+            for(Vector2 v : this.kb.frontier) {
                 if(kb.grid[v.x-1][v.y-1].probWump < 0.99999f) {
                     kb.grid[v.x-1][v.y-1].probWump = 0.0f;
                     w.probs[v.x-1][v.y-1][1] = 0.0f;
@@ -152,20 +159,24 @@ public class MyAgent implements Agent
             }
         }
 
+        // ============== Debug ==============
         System.out.println("Frontier: ");
-        for (Vector2 f : this.kb.Frontier)
+        for (Vector2 f : this.kb.frontier)
         {
             Cell c = kb.grid[f.x-1][f.y-1];
             System.out.println("F: " + f.toString() + ", ProbPit: " + Float.toString(c.probPit) + ", ProbWump: " + Float.toString(c.probWump));
         }
         System.out.println("##########");
+        // ===================================
         
+        // Calculate new path if reached the end of the old one.
         if (currPath.isEmpty()) {
             Node[] startGoal = kb.calcPathData(cX, cY);        
             AStar.make(startGoal[1], startGoal[0], this.currPath);
             this.currPathIndex = 1;
         }
 
+        // ============== Debug ==============
         System.out.println("Current path");
         for(int i = 0; i < this.currPath.size(); i++) {
             boolean isCP = this.currPathIndex == i;
@@ -173,7 +184,9 @@ public class MyAgent implements Agent
             System.out.print("-> " + (isCP?"[":"") + n.index.toString() + (isCP?"] ":" "));
         }
         System.out.print("\n");
+        // ===================================
         
+        // Only move if more than the starting node is in the path.
         if(this.currPath.size() != 1) {
             Node nextNode = this.currPath.get(this.currPathIndex);
             
@@ -183,7 +196,6 @@ public class MyAgent implements Agent
             // Update frontier
             this.kb.updateFrontier(nextNode.index.x, nextNode.index.y);
         } else {
-            //this.currPath.clear();
             this.currPathIndex = 0;
         }
 

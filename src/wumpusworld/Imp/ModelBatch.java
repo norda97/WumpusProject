@@ -33,12 +33,13 @@ public class ModelBatch
             return 0.0;
         }
 
+        // Calculate probabilities depending on the number of unknown cells, pits left and if wumpus was found or not.
         this.probP = (double)pitLeft/numUnknowns;
         this.probW = (wumpusLeft ? 1.0 : 1.0)/numUnknowns;
 
+        // Remove the query from the frontier.
         List<Vector2> frontier = new ArrayList<Vector2>();
-        for(Vector2 v : this.kb.Frontier)
-        {
+        for(Vector2 v : this.kb.frontier) {
             if(v.x != x || v.y != y)
                 frontier.add(v);
         }
@@ -49,35 +50,50 @@ public class ModelBatch
         double sumModelsProbPositive = 0.0;
         double sumModelsProbNegative = 0.0;
 
-        if(prediction.contains(World.PIT))
-            kbCpy.addPit(x, y);
-        if(prediction.contains(World.WUMPUS))
-            kbCpy.addWumpus(x, y);
+        // Calc combinations and probabilities when pit and/or wumpus is present.
+        {
+            if(prediction.contains(World.PIT))
+                kbCpy.addPit(x, y);
+            if(prediction.contains(World.WUMPUS))
+                kbCpy.addWumpus(x, y);
 
-        sumModelsProbPositive = getProbFromModels(kbCpy, pitLeft, wumpusLeft, frontier, x, y);
-        //System.out.println("--->Positive: " + Double.toString(sumModelsProbPositive));
-        
+            sumModelsProbPositive = getProbFromModels(kbCpy, pitLeft, wumpusLeft, frontier, x, y);
+            //System.out.println("--->Positive: " + Double.toString(sumModelsProbPositive));
+        }
+
+        // Reset copy for next calculations to work.
         kbCpy = null;
         kbCpy = new KnowledgeBase(this.kb);
-        
-        if(prediction.contains(World.PIT))
-            kbCpy.removePit(x, y);
-        if(prediction.contains(World.WUMPUS))
-            kbCpy.removeWumpus(x, y);
 
-        // Calc combinations and probabilities when pit/wumpus is not present.
-        sumModelsProbNegative = getProbFromModels(kbCpy, pitLeft, wumpusLeft, frontier, x, y);
-        //System.out.println("--->Negative: " + Double.toString(sumModelsProbNegative));
+        // Calc combinations and probabilities when pit and/or wumpus is not present.
+        {
+            if(prediction.contains(World.PIT))
+                kbCpy.removePit(x, y);
+            if(prediction.contains(World.WUMPUS))
+                kbCpy.removeWumpus(x, y);
 
-        // Calculate probability.
+            sumModelsProbNegative = getProbFromModels(kbCpy, pitLeft, wumpusLeft, frontier, x, y);
+            //System.out.println("--->Negative: " + Double.toString(sumModelsProbNegative));
+        }
+
+        // --------------------- Calculate probability ---------------------
         double prob = 0.0;
-        if(prediction.contains(World.PIT))
+        // Get probability if both wumpus and pit is present.
+        if(prediction.contains(World.WUMPUS + World.PIT)) {
+            prob = probP * probW;
+        }
+        // Get probability if only pit is present.
+        else if(prediction.contains(World.PIT))
             prob = probP;
+        // Get probability if only wumpus is present.
         else if(prediction.contains(World.WUMPUS))
             prob = probW;
-        
+
+        // Calculate the positive and negative probabilities for the prediction.
         double probPositive = sumModelsProbPositive * prob;
         double probNegative = sumModelsProbNegative * (1.0 - prob);
+
+        // Normalize the positive probability.
         double sum = probPositive+probNegative;
         double finalProb = 0.0;
         if(sum > 0.00000001) finalProb = probPositive/sum;
@@ -92,6 +108,7 @@ public class ModelBatch
         // Generate all possible models and compute its total probability.
         int n = frontier.size();
 
+        // Get the total number of combination a pit can be in (does not check if it is against the rules or not)
         int totCominationsPits = (int)Math.pow(2.0, n); // Includes one with 0 pits and all pits.
         List<BorderCell[]> combinationsPits = new ArrayList<BorderCell[]>();
         for(int i = 0; i < totCominationsPits; i++) {
@@ -105,7 +122,8 @@ public class ModelBatch
             combinationsPits.add(border);
         }
 
-        int totCominationsWumpus = n+1; // Includes one with 0 wumpus.
+        // Get the total number of combination a wumpus can be in (does not check if it is against the rules or not)
+        int totCominationsWumpus = n+1; // Includes one with no wumpus.
         List<BorderCell[]> combinationsWump = new ArrayList<BorderCell[]>();
         // i = -1 so that active becomes false for every cell in the first iteration. With other words, no wumpus for the first combination.
         for(int i = -1; i < totCominationsWumpus-1; i++) {
@@ -120,19 +138,23 @@ public class ModelBatch
         }
 
         //System.out.println("Num combs, Pit: " + Integer.toString(totCominationsPits) + ", Wump: " + Integer.toString(totCominationsWumpus));
+        
+        // Generate a model for each combination of wumpus and pits. Only add those who are legal. 
         for(BorderCell[] borderPits : combinationsPits)
         {
             for(BorderCell[] borderWump : combinationsWump)
             {
                 //System.out.println("\n================== New Model ==================");
                 Model model = new Model(kb);
-                model.addEmpty(x, y);
+                model.addEmpty(x, y); // This will ensure that the model accounts for the prediction.
+                // Add combinations of pits.
                 for(BorderCell cell : borderPits) {
                     if(cell.active)
                         model.addType(cell.v.x, cell.v.y, World.PIT);
                     else
                         model.addEmpty(cell.v.x, cell.v.y);
                 }
+                // Add combinations of wumpus.
                 for(BorderCell cell : borderWump) {
                     if(cell.active)
                         model.addType(cell.v.x, cell.v.y, World.WUMPUS);
@@ -140,6 +162,7 @@ public class ModelBatch
                         model.addEmpty(cell.v.x, cell.v.y);
                 }
 
+                // Check if it is a legal combination of pits and wumpus.
                 if(model.isLegal())
                 {
                     double prob = model.getProbability(this.probP, this.probW);
