@@ -71,21 +71,18 @@ public class MyAgent implements Agent
         // Clear path if at the end and shoot if appropriate.
         if(this.currPathIndex == (this.currPath.size()-1)) {
             this.currPath.clear();
+
             if(kb.shouldTryShootingWumpus) {
                 // Turn towards wumpus and shoot.
                 shootTo(getDirection(cX, cY, kb.wumpusPos.x, kb.wumpusPos.y));
-                System.out.println("Shoot!!!");
-                if(w.wumpusAlive() == false) {
-                    System.out.println("-->Wumpus was there and is now dead.");
-                } else {
-                    System.out.println("-->Wumpus was not there.");
-                }
-                kb.removeFact(kb.wumpusPos.x, kb.wumpusPos.y, Fact.Type.WUMPUS);
-                Cell[] adj = kb.getAdjacent(kb.wumpusPos);
-                for(int i = 0; i < 4; i++) {
-                    if(adj[i] != null) {
-                        if(kb.hasFact(adj[i].pos.x, adj[i].pos.y, Fact.Type.STENCH))
-                            kb.removeFact(adj[i].pos.x, adj[i].pos.y, Fact.Type.STENCH);
+                boolean succeeded = !w.wumpusAlive();
+                if(succeeded) {
+                    Cell[] adj = kb.getAdjacent(kb.wumpusPos);
+                    for(int i = 0; i < 4; i++) {
+                        if(adj[i] != null) {
+                            if(kb.hasFact(adj[i].pos.x, adj[i].pos.y, Fact.Type.STENCH))
+                                kb.removeFact(adj[i].pos.x, adj[i].pos.y, Fact.Type.STENCH);
+                        }
                     }
                 }
                 kb.grid[kb.wumpusPos.x-1][kb.wumpusPos.y-1].probWump = 0.0f;
@@ -112,15 +109,8 @@ public class MyAgent implements Agent
         }
         if(kb.hasFact(cX, cY, Fact.Type.UNKNOWN)) {
             kb.addType(new Vector2(cX, cY), Fact.Type.EMPTY);
-            //System.out.println("Added empty at " + Integer.toString(cX) + ", " + Integer.toString(cY));
         }
-        //if(kb.grid[cX-1][cY-1].unknown) {
-        //    kb.addType(new Vector2(cX, cY), Fact.Type.EMPTY);
-        //}
-        
-        // Update knowledgebase with current knowledge
-        //kb.update();
-        
+
         // Update GUI numbers
         boolean wumpusFound = false;
         for(Vector2 v : this.kb.frontier) {
@@ -159,16 +149,6 @@ public class MyAgent implements Agent
             }
         }
 
-        // ============== Debug ==============
-        System.out.println("Frontier: ");
-        for (Vector2 f : this.kb.frontier)
-        {
-            Cell c = kb.grid[f.x-1][f.y-1];
-            System.out.println("F: " + f.toString() + ", ProbPit: " + Float.toString(c.probPit) + ", ProbWump: " + Float.toString(c.probWump));
-        }
-        System.out.println("##########");
-        // ===================================
-        
         // Calculate new path if reached the end of the old one.
         if (currPath.isEmpty()) {
             Node[] startGoal = kb.calcPathData(cX, cY);        
@@ -176,16 +156,6 @@ public class MyAgent implements Agent
             this.currPathIndex = 1;
         }
 
-        // ============== Debug ==============
-        System.out.println("Current path");
-        for(int i = 0; i < this.currPath.size(); i++) {
-            boolean isCP = this.currPathIndex == i;
-            Node n = this.currPath.get(i);
-            System.out.print("-> " + (isCP?"[":"") + n.index.toString() + (isCP?"] ":" "));
-        }
-        System.out.print("\n");
-        // ===================================
-        
         // Only move if more than the starting node is in the path.
         if(this.currPath.size() != 1) {
             Node nextNode = this.currPath.get(this.currPathIndex);
@@ -218,7 +188,6 @@ public class MyAgent implements Agent
             else if(y < 0)
                 return World.DIR_DOWN;
         }
-        System.out.println("Warning: The difference in direction is 0!");
         return World.DIR_DOWN;
     }
     

@@ -5,6 +5,10 @@ import java.util.*;
 import wumpusworld.World;
 import wumpusworld.Imp.Vector2;
 
+/**
+ *
+ * @author Adrian Nordin, Jonathan Åleskog, Daniel Cheh
+ */
 public class Model
 {
     public String[][] grid;
@@ -48,26 +52,16 @@ public class Model
         }
     }
 
-    public void print()
-    {
-        for(int y = 3; y >= 0; y--) {
-            for(int x = 0; x < 4; x++) {
-                if(this.grid[x][y].isEmpty())
-                    System.out.print("0 ");
-                else System.out.print(this.grid[x][y] + " ");
-            }
-            System.out.println("|");
-        }
-    }
-
     public double getProbability(double probP, double probW)
     {
         double probability = 1.0;
         for(Vector2 v : this.frontier) {
-            if(is(v.x, v.y, World.PIT))
-                probability *= probP;
+            if(is(v.x, v.y, World.PIT + World.WUMPUS))
+                probability *= probP * probW;
+            else if(is(v.x, v.y, World.PIT))
+                probability *= probP*(1.0 - probW);
             else if(is(v.x, v.y, World.WUMPUS))
-                probability *= probW;
+                probability *= probW*(1.0 - probP);
             else
                 probability *= (1.0 - probP)*(1.0 - probW);
         }
@@ -78,10 +72,10 @@ public class Model
     {
         this.grid[x-1][y-1] = this.grid[x-1][y-1].replaceAll(World.UNKNOWN, "");
         this.grid[x-1][y-1] += type;
-        addEmpty(x, y);
+        addFrontier(x, y);
     }
 
-    public void addEmpty(int x, int y)
+    public void addFrontier(int x, int y)
     {
         boolean exist = false;
         for(Vector2 v : this.frontier) {
@@ -95,7 +89,6 @@ public class Model
     public boolean isLegal()
     {
         convertFrontier();
-        //print();
         
         boolean legal = true;
         for(int x = 0; x < 4; x++) {
@@ -133,12 +126,10 @@ public class Model
     {
         return this.grid[x-1][y-1].contains(type);
     }
-
+    
     private void convertFrontier()
     {
-        //System.out.print("Frontier: ");
         for(Vector2 v : this.frontier) {
-            //System.out.print(v.toString() + " ");
             if(isCellLegalOR(v.x, v.y, World.PIT))
                 this.grid[v.x-1][v.y-1] += World.BREEZE;
             if(isCellLegalOR(v.x, v.y, World.WUMPUS))
@@ -146,7 +137,6 @@ public class Model
             if(is(v.x, v.y, World.UNKNOWN))
                 this.grid[v.x-1][v.y-1] = this.grid[v.x-1][v.y-1].replaceAll(World.UNKNOWN, "");
         }
-        //System.out.print("\n");
     }
 
     private boolean isCellLegalAND(int x, int y, String type) 
