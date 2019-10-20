@@ -1,6 +1,6 @@
 package wumpusworld.Imp;
 
-import wumpusworld.Imp.*;
+import wumpusworld.Imp.Vector2;
 
 public class BorderCell
 {

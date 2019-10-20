@@ -11,8 +11,8 @@ public class KnowledgeBase
     
     public int knownPits;
     public boolean wumpusFound;
-    private List<Vector2> knownStenches; 
-    private List<Vector2> knownBreezes; 
+    //private List<Vector2> knownStenches; 
+    //private List<Vector2> knownBreezes; 
     public List<Vector2> Frontier; 
     public int size;
 
@@ -20,8 +20,8 @@ public class KnowledgeBase
     {
         this.size = w.getSize();
         this.grid = new Cell[this.size][this.size];
-        this.knownStenches = new ArrayList<Vector2>();
-        this.knownBreezes = new ArrayList<Vector2>();
+        //this.knownStenches = new ArrayList<Vector2>();
+        //this.knownBreezes = new ArrayList<Vector2>();
         this.Frontier = new ArrayList<Vector2>();
         
         // Player always start in (1, 1)
@@ -29,12 +29,12 @@ public class KnowledgeBase
         this.Frontier.add(new Vector2(2, 1));
         
         this.knownPits = 0;
-        this.wumpusFound = false;
+        //this.wumpusFound = false;
 
         for (int x = 0; x < this.size; x++) {
-                for (int y = 0; y < this.size; y++) {
-                        grid[x][y] = new Cell(x+1, y+1);
-                }
+            for (int y = 0; y < this.size; y++) {
+                    this.grid[x][y] = new Cell(x+1, y+1);
+            }
         }
     }
     
@@ -43,15 +43,15 @@ public class KnowledgeBase
         this.knownPits = other.knownPits;
         this.wumpusFound = other.wumpusFound;
 
-        this.knownStenches = new ArrayList<Vector2>();
-        this.knownBreezes = new ArrayList<Vector2>();
+        //this.knownStenches = new ArrayList<Vector2>();
+        //this.knownBreezes = new ArrayList<Vector2>();
         this.Frontier = new ArrayList<Vector2>();
         
-        for (Vector2 c : other.knownStenches)
-            this.knownStenches.add(new Vector2(c.x, c.y));
+        //for (Vector2 c : other.knownStenches)
+        //    this.knownStenches.add(new Vector2(c.x, c.y));
         
-        for (Vector2 c : other.knownBreezes)
-            this.knownBreezes.add(new Vector2(c.x, c.y));
+        //for (Vector2 c : other.knownBreezes)
+        //    this.knownBreezes.add(new Vector2(c.x, c.y));
         
         for (Vector2 c : other.Frontier)
             this.Frontier.add(new Vector2(c.x, c.y));
@@ -69,15 +69,10 @@ public class KnowledgeBase
          if (!isValidPosition(x, y))
             return false;
         Cell c = grid[x-1][y-1];
-        
-        boolean pit = false;
-        for (Fact f : c.facts) 
-            if (f.type == Fact.Type.PIT)
-                pit = true;
-        
-        return pit;
+        return hasFact(c.pos.x, c.pos.y, Fact.Type.PIT);
     }
     
+    /*
     public boolean hasStench(int x, int y) {
          if (!isValidPosition(x, y))
             return false;
@@ -90,20 +85,16 @@ public class KnowledgeBase
         
         return res;
     }
+    */
     
     public boolean hasWumpus(int x, int y) {
          if (!isValidPosition(x, y))
             return false;
-         
         Cell c = grid[x-1][y-1];
-        boolean res = false;
-        for (Fact f : c.facts) 
-            if (f.type == Fact.Type.WUMPUS)
-                res = true;
-        
-        return res;
+        return hasFact(c.pos.x, c.pos.y, Fact.Type.WUMPUS);
     }
     
+    /*
     public boolean hasBreeze(int x, int y) {
         if (!isValidPosition(x, y))
             return false;
@@ -116,7 +107,8 @@ public class KnowledgeBase
         
         return res;
     }
-    
+    */
+    /*
     public boolean isUnknown(int x, int y) {
          if (!isValidPosition(x, y))
             return false;
@@ -124,6 +116,7 @@ public class KnowledgeBase
         
         return c.unknown;
     }
+    */
     
     public boolean isValidPosition(int x, int y) {
         if (x < 1) return false;
@@ -138,7 +131,7 @@ public class KnowledgeBase
             Cell c = grid[x-1][y-1];
             c.addFact(new Fact(Fact.Type.PIT));
             removeFact(x, y, Fact.Type.UNKNOWN);
-            c.unknown = false;
+            //c.unknown = false;
             return true;
         }
         return false;
@@ -280,7 +273,7 @@ public class KnowledgeBase
         */
         return result;
     }
-
+    /*
     private Node getSafeNeighbours(Cell c, List<Node> visited, Vector2 bb) {
         
         Cell[] adjacent = getAdjacent(new Vector2(c.pos.x, c.pos.y));
@@ -317,7 +310,7 @@ public class KnowledgeBase
                 }
             }
         }
-        /*
+        
         System.out.println("Added (" + currNode.index.x +
                                 ", " + currNode.index.y + ")");
         
@@ -326,9 +319,9 @@ public class KnowledgeBase
             System.out.println("    Neigh(" + n.index.x +
                                 ", " + n.index.y + ")");
         }
-        */
+        
         return currNode;
-    }
+    }*/
     
     public void reset()
     {
@@ -354,7 +347,7 @@ public class KnowledgeBase
 
         return neighbours;
     }
-    
+    /*
     public void update() {
          for (int x = 1; x <= this.size; x++) {
             for (int y = 1; y <= this.size; y++) {
@@ -362,7 +355,7 @@ public class KnowledgeBase
             }
         }   
     }
-    
+    */
     public void removeFact(int x, int y, Fact.Type type) {
         Cell c = grid[x-1][y-1];
         for (int i = 0; i < c.facts.size(); i++) {
@@ -387,20 +380,20 @@ public class KnowledgeBase
     // Only adds fact if it isn't already added
     public void addType(Vector2 pos, Fact.Type foundType) {
         if(foundType != Fact.Type.UNKNOWN) removeFact(pos.x, pos.y, Fact.Type.UNKNOWN);
-        boolean alreadyAdded = false;
-        Cell c = grid[pos.x-1][pos.y-1];
+        boolean alreadyAdded = hasFact(pos.x, pos.y, foundType);
+        /*Cell c = grid[pos.x-1][pos.y-1];
         for (int i = 0; i < c.facts.size(); i++) {
             if (c.facts.get(i).type == foundType)
                 alreadyAdded = true;
-        }
+        }*/
         
         if (!alreadyAdded) {
             grid[pos.x-1][pos.y-1].addFact(new Fact(foundType));
-            
+            /*
             if (foundType == Fact.Type.STENCH)
                 this.knownStenches.add(new Vector2(pos.x-1 , pos.y-1));
             if (foundType == Fact.Type.BREEZE)
-                this.knownBreezes.add(new Vector2(pos.x-1 , pos.y-1));
+                this.knownBreezes.add(new Vector2(pos.x-1 , pos.y-1));*/
         }
            
     }
@@ -427,17 +420,17 @@ public class KnowledgeBase
             
             for (Cell adj : adjacent) {
                 if (adj != null) {
-                    if (adj.unknown && isFrontier(adj.pos) == -1)
+                    if (isFrontier(adj.pos) == -1 && hasFact(adj.pos.x, adj.pos.y, Fact.Type.UNKNOWN))
                         this.Frontier.add(adj.pos);
                 }
             }
         }
     }
-    
+    /*
     private void calcProbs(int x, int y) {
         
-    }
-    
+    }*/
+    /*
     private void handleFacts(Cell c) {
         
         if (c.unknown == false) {
@@ -469,7 +462,7 @@ public class KnowledgeBase
 
     private void handleStench(Fact f, Vector2 pos) {
         Cell[] adjacent = this.getAdjacent(pos);
-        /*
+        
         for (Cell adj : adjacent) {
             if (adj != null) {
                 if (!adj.safe) {
@@ -479,7 +472,7 @@ public class KnowledgeBase
                         adj.addFact(new Fact(Fact.Type.WUMPUS));
                }
             }
-        }*/
+        }
     }
     
     private void handleEmpty(Fact f, Vector2 pos) {
@@ -508,5 +501,5 @@ public class KnowledgeBase
             if (unknown.probPit < newPerc)
                 unknown.probPit = 1.f/unknownCount;
         }
-    }
+    }*/
 }

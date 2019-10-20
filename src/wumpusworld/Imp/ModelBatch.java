@@ -1,11 +1,8 @@
 package wumpusworld.Imp;
 
 import wumpusworld.Imp.Vector2;
-import wumpusworld.Imp.Node;
-import wumpusworld.Imp.Env;
 
 import java.util.List;
-import java.util.Vector;
 import java.util.ArrayList;
 
 import wumpusworld.Imp.KnowledgeBase;
@@ -19,16 +16,13 @@ public class ModelBatch
     public List<Vector2> frontier;
     
     private KnowledgeBase kb;
-    private Env env;
 
-    
     double probP = 3.0/15.0;
     double probW = 1.0/15.0;
     
     public ModelBatch(KnowledgeBase kb)
     {
         this.kb = kb;
-        this.env = new Env();
     }
 
     public double predict(int pitLeft, boolean wumpusLeft, int numUnknowns, int x, int y, String prediction)
@@ -51,7 +45,6 @@ public class ModelBatch
 
         // Copy world and set it to current.
         KnowledgeBase kbCpy = new KnowledgeBase(this.kb);
-        this.env.setKB(kbCpy);
 
         double sumModelsProbPositive = 0.0;
         double sumModelsProbNegative = 0.0;
@@ -66,7 +59,6 @@ public class ModelBatch
         
         kbCpy = null;
         kbCpy = new KnowledgeBase(this.kb);
-        this.env.setKB(kbCpy);
         
         if(prediction.contains(World.PIT))
             kbCpy.removePit(x, y);
@@ -137,9 +129,9 @@ public class ModelBatch
                 model.addEmpty(x, y);
                 for(BorderCell cell : borderPits) {
                     if(cell.active)
-                    model.addType(cell.v.x, cell.v.y, World.PIT);
+                        model.addType(cell.v.x, cell.v.y, World.PIT);
                     else
-                    model.addEmpty(cell.v.x, cell.v.y);
+                        model.addEmpty(cell.v.x, cell.v.y);
                 }
                 for(BorderCell cell : borderWump) {
                     if(cell.active)

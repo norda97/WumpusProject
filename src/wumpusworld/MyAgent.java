@@ -2,10 +2,8 @@ package wumpusworld;
 
 import wumpusworld.Imp.KnowledgeBase;
 import wumpusworld.Imp.Node;
-import wumpusworld.Imp.Env;
 
 import java.util.List;
-import java.time.Year;
 import java.util.ArrayList;
 
 import wumpusworld.Imp.*;
@@ -112,12 +110,16 @@ public class MyAgent implements Agent
             kb.addType(new Vector2(cX, cY), Fact.Type.PIT);
             kb.knownPits++;
         }
-        if(kb.grid[cX-1][cY-1].unknown) {
+        if(kb.hasFact(cX, cY, Fact.Type.UNKNOWN)) {
             kb.addType(new Vector2(cX, cY), Fact.Type.EMPTY);
+            //System.out.println("Added empty at " + Integer.toString(cX) + ", " + Integer.toString(cY));
         }
+        //if(kb.grid[cX-1][cY-1].unknown) {
+        //    kb.addType(new Vector2(cX, cY), Fact.Type.EMPTY);
+        //}
         
         // Update knowledgebase with current knowledge
-        kb.update();
+        //kb.update();
         
         // Update GUI numbers
         boolean wumpusFound = false;
@@ -164,7 +166,7 @@ public class MyAgent implements Agent
             this.currPathIndex = 1;
         }
 
-        System.out.println("Curren path");
+        System.out.println("Current path");
         for(int i = 0; i < this.currPath.size(); i++) {
             boolean isCP = this.currPathIndex == i;
             Node n = this.currPath.get(i);

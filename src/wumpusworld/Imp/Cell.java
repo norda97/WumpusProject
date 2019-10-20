@@ -19,8 +19,8 @@ public class Cell {
     public Vector2 pos;
     public float probWump;
     public float probPit;
-    public boolean unknown;
-    public boolean safe;
+    //public boolean unknown;
+    //public boolean safe;
     
     public Cell(int x, int y) {
         this.facts = new ArrayList<Fact>();
@@ -28,16 +28,16 @@ public class Cell {
         this.pos = new Vector2(x, y);
         this.probWump = 0.0f;
         this.probPit = 0.0f;
-        this.unknown = true;
-        this.safe = false;
+        //this.unknown = true;
+        //this.safe = false;
     }
     
     public Cell clone() {
         Cell clone = new Cell(this.pos.x, this.pos.y);
         clone.probWump = this.probWump;
         clone.probPit = this.probPit;
-        clone.unknown = this.unknown;
-        clone.safe = this.safe;
+        //clone.unknown = this.unknown;
+        //clone.safe = this.safe;
         clone.facts = new ArrayList<Fact>();
         
         for (Fact f : this.facts)
@@ -48,9 +48,9 @@ public class Cell {
     
     public void addFact(Fact f) {
         this.facts.add(f);
-        this.unknown = false;
-        if (f.type == Fact.Type.EMPTY)
-            this.safe = true;
+        //this.unknown = false;
+        //if (f.type == Fact.Type.EMPTY)
+        //   this.safe = true;
     }
     
     public String toString()

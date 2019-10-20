@@ -3,7 +3,7 @@ package wumpusworld.Imp;
 import java.util.*;
 
 import wumpusworld.World;
-import wumpusworld.Imp.*;
+import wumpusworld.Imp.Vector2;
 
 public class Model
 {
