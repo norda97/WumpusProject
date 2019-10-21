@@ -1,7 +1,6 @@
 package wumpusworld;
 
 import java.util.Vector;
-import wumpusworld.Imp.Fact;
 
 /**
  * This class handles an instance of the Wumpus World. It contains the world
@@ -49,10 +48,6 @@ public class World
     public static final String A_TURN_LEFT = "l";
     public static final String A_TURN_RIGHT = "r";
     
-    // #### OUR CODE ####
-    public float[][][] probs = new float[4][4][2];;
-    // ######## OUR CODE ########
-    
     /**
      * Creates a new Wumpus World. The Wumpus World works with
      * any size 4 or larger, but only size 4 is supported by
@@ -72,7 +67,6 @@ public class World
                 w[x][y] = UNKNOWN;
             }
         }
-        
         
         setVisited(1, 1);
     }
@@ -596,7 +590,6 @@ public class World
             score -= 1000;
             gameOver = true;
         }
-        
         if (hasPit(pX,pY))
         {
             score -= 1000;

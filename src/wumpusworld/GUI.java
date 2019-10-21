@@ -10,7 +10,7 @@ import java.util.Vector;
  * GUI for the Wumpus World. Only supports worlds of 
  * size 4.
  * 
- * @author Johan Hagelbäck
+ * @author Johan HagelbÃ¤ck
  */
 public class GUI implements ActionListener
 {
@@ -34,8 +34,6 @@ public class GUI implements ActionListener
     private ImageIcon l_player_left;
     private ImageIcon l_player_right;
     
-    // ######## OUR CODE ########
-    private JLabel[][][] text;
     /**
      * Creates and start the GUI.
      */
@@ -107,20 +105,13 @@ public class GUI implements ActionListener
         return true;
     }
     
-    // ###### OUR CODE ######
-    public void setText(int i, int j, float probPit, int wump) {
-        this.text[i][j][0].setText("prob: " + probPit);
-        this.text[i][j][1].setText("w:" + wump);
-    }
-    // ###### OUR CODE ######
-    
     /**
      * Creates all window components.
      */
     private void createWindow()
     {
         frame = new JFrame("Wumpus World");
-        frame.setSize(820, 640);
+        frame.setSize(920, 640);
         frame.getContentPane().setLayout(new FlowLayout());
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         
@@ -131,9 +122,6 @@ public class GUI implements ActionListener
         
         //Add blocks
         blocks = new JPanel[4][4];
-        // ####### OUR CODE #########
-        text = new JLabel[4][4][2];
-        // ####### OUR CODE #########
         for (int j = 3; j >= 0; j--)
         {
             for (int i = 0; i < 4; i++)
@@ -143,13 +131,6 @@ public class GUI implements ActionListener
                 blocks[i][j].setPreferredSize(new Dimension(150,150));
                 blocks[i][j].setBorder(BorderFactory.createLineBorder(Color.black));
                 blocks[i][j].setLayout(new GridLayout(2,2));
-                // ############### OUR CODE !!!!####################
-                blocks[i][j].setLayout(new GridLayout(2,3));
-                text[i][j][0] = new JLabel();
-                text[i][j][1] = new JLabel();
-                text[i][j][0].setPreferredSize(new Dimension(50,25));
-                text[i][j][1].setPreferredSize(new Dimension(50,25));
-                // ############### OUR CODE !!!!####################
                 gamepanel.add(blocks[i][j]);
             }
         }
@@ -157,7 +138,7 @@ public class GUI implements ActionListener
         
         //Add buttons panel
         JPanel buttons = new JPanel();
-        buttons.setPreferredSize(new Dimension(200,600));
+        buttons.setPreferredSize(new Dimension(280,600));
         buttons.setLayout(new FlowLayout());
         //Status label
         status = new JLabel("", SwingConstants.CENTER);
@@ -181,17 +162,17 @@ public class GUI implements ActionListener
         br.addActionListener(this);
         buttons.add(br);
         JButton bg = new JButton("Grab");
-        bg.setPreferredSize(new Dimension(45,22));
+        bg.setPreferredSize(new Dimension(85,22));
         bg.setActionCommand("GRAB");
         bg.addActionListener(this);
         buttons.add(bg);
         JButton bc = new JButton("Climb");
-        bc.setPreferredSize(new Dimension(55,22));
+        bc.setPreferredSize(new Dimension(85,22));
         bc.setActionCommand("CLIMB");
         bc.addActionListener(this);
         buttons.add(bc);
         JButton bs = new JButton("Shoot");
-        bs.setPreferredSize(new Dimension(65,22));
+        bs.setPreferredSize(new Dimension(85,22));
         bs.setActionCommand("SHOOT");
         bs.addActionListener(this);
         buttons.add(bs);
@@ -301,16 +282,6 @@ public class GUI implements ActionListener
             {
                 blocks[i][j].removeAll();
                 blocks[i][j].setBackground(Color.WHITE);
-                
-                // ############# OUR CODE ################
-                
-                text[i][j][0].setText("probP:" + w.probs[i][j][0]);
-                text[i][j][1].setText("wump:" + w.probs[i][j][1]);
-                blocks[i][j].add(text[i][j][0]);
-                blocks[i][j].add(text[i][j][1]);
-                
-                // ############# OUR CODE ################
-                
                 if (w.hasPit(i+1, j+1))
                 {
                     blocks[i][j].add(new JLabel(l_pit));

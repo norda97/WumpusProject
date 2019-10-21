@@ -89,7 +89,6 @@ public class MyAgent implements Agent
                     }
                 }
                 kb.grid[kb.wumpusPos.x-1][kb.wumpusPos.y-1].probWump = 0.0f;
-                w.probs[kb.wumpusPos.x-1][kb.wumpusPos.y-1][1] = 0.0f;
                 kb.shouldTryShootingWumpus = false;
                 kb.hasArrow = false;
             }
@@ -144,9 +143,6 @@ public class MyAgent implements Agent
                 c.probWump = probPitAndWump;
             }
             
-            // Update GUI
-            w.probs[v.x-1][v.y-1][0] = c.probPit;
-            w.probs[v.x-1][v.y-1][1] = c.probWump;
         }
 
         // Set all probabilities (except the one with a probability of 1.0) for wumpus to 0.0 if wumpus was found.
@@ -154,7 +150,6 @@ public class MyAgent implements Agent
             for(Vector2 v : this.kb.frontier) {
                 if(kb.grid[v.x-1][v.y-1].probWump < 0.99999f) {
                     kb.grid[v.x-1][v.y-1].probWump = 0.0f;
-                    w.probs[v.x-1][v.y-1][1] = 0.0f;
                 }
             }
         }

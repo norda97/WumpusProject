@@ -11,6 +11,7 @@ import java.util.Vector;
  * @author Johan Hagelbäck
  */
 public class WumpusWorld {
+
     /**
      * @param args the command line arguments
      */
