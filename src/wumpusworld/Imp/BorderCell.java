@@ -2,6 +2,10 @@ package wumpusworld.Imp;
 
 import wumpusworld.Imp.Vector2;
 
+/**
+ *
+ * @author Adrian Nordin, Jonathan Åleskog, Daniel Cheh
+ */
 public class BorderCell
 {
     public Vector2 v;
